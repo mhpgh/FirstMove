@@ -140,12 +140,21 @@ export class MemStorage implements IStorage {
   async generatePairingCode(userId: number): Promise<string> {
     const code = Math.random().toString(36).substr(2, 6).toUpperCase();
     
-    // Create a new couple entry with this user and pairing code
-    await this.createCouple({
-      user1Id: userId,
-      user2Id: 0, // Will be filled when partner joins
-      pairingCode: code
-    });
+    // Check if user already has a couple record
+    const existingCouple = await this.getCoupleByUserId(userId);
+    if (existingCouple) {
+      // Update existing couple with new pairing code
+      existingCouple.pairingCode = code;
+      existingCouple.isActive = false;
+      existingCouple.user2Id = 0;
+    } else {
+      // Create a new couple entry with this user and pairing code
+      await this.createCouple({
+        user1Id: userId,
+        user2Id: 0, // Will be filled when partner joins
+        pairingCode: code
+      });
+    }
     
     return code;
   }
