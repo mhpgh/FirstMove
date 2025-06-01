@@ -19,6 +19,7 @@ export interface IStorage {
   getCoupleByUserId(userId: number): Promise<Couple | undefined>;
   getCoupleByPairingCode(code: string): Promise<Couple | undefined>;
   createCouple(couple: InsertCouple): Promise<Couple>;
+  updateCouple(coupleId: number, user2Id: number): Promise<void>;
   activateCouple(coupleId: number): Promise<void>;
   generatePairingCode(userId: number): Promise<string>;
   
@@ -119,6 +120,13 @@ export class MemStorage implements IStorage {
     };
     this.couples.set(id, couple);
     return couple;
+  }
+
+  async updateCouple(coupleId: number, user2Id: number): Promise<void> {
+    const couple = this.couples.get(coupleId);
+    if (couple) {
+      couple.user2Id = user2Id;
+    }
   }
 
   async activateCouple(coupleId: number): Promise<void> {

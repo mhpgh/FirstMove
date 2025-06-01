@@ -86,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update the couple with the second user
-      couple.user2Id = userId;
+      await storage.updateCouple(couple.id, userId);
       await storage.activateCouple(couple.id);
       
       res.json({ success: true, coupleId: couple.id });
