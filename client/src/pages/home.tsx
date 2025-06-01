@@ -222,7 +222,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
-              <p className="text-gray-500 text-sm mb-6">Let your partner know privately</p>
+              <p className="text-gray-500 text-sm mb-6">We'll let you know if your partner feels the same way</p>
               
               <Button
                 onClick={handleInMoodPress}

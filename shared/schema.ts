@@ -22,8 +22,9 @@ export const couples = pgTable("couples", {
 export const moods = pgTable("moods", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  moodType: text("mood_type").notNull(), // romantic, playful, intimate, cuddly
+  moodType: text("mood_type").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  duration: integer("duration").notNull().default(60), // duration in minutes
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -51,6 +52,7 @@ export const insertCoupleSchema = createInsertSchema(couples).pick({
 export const insertMoodSchema = createInsertSchema(moods).pick({
   userId: true,
   moodType: true,
+  duration: true,
   expiresAt: true,
 });
 

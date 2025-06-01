@@ -179,6 +179,7 @@ export class MemStorage implements IStorage {
       ...insertMood, 
       id,
       isActive: true,
+      duration: insertMood.duration || 60,
       createdAt: new Date()
     };
     this.moods.set(id, mood);
