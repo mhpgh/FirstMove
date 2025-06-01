@@ -225,6 +225,8 @@ export class MemStorage implements IStorage {
     if (!couple || !couple.isActive) return undefined;
     
     const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+    if (partnerId === 0) return undefined; // No partner assigned yet
+    
     return this.getUser(partnerId);
   }
 }

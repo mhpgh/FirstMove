@@ -24,6 +24,18 @@ function App() {
     }
   }, []);
 
+  // Add a dev helper to clear storage
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+        localStorage.clear();
+        window.location.reload();
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   const handleAuthSuccess = () => {
     const authState = getStoredAuth();
     if (authState.user) {
