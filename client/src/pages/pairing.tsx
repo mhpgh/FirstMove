@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Users } from "lucide-react";
+import { Copy, Users, LogOut } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User } from "@/lib/auth";
+import { User, logoutUser } from "@/lib/auth";
 
 const pairingSchema = z.object({
   pairingCode: z.string().length(6, "Pairing code must be 6 characters"),
@@ -21,9 +21,10 @@ type PairingFormData = z.infer<typeof pairingSchema>;
 interface PairingPageProps {
   user: User;
   onPairingSuccess: () => void;
+  onLogout: () => void;
 }
 
-export default function PairingPage({ user, onPairingSuccess }: PairingPageProps) {
+export default function PairingPage({ user, onPairingSuccess, onLogout }: PairingPageProps) {
   const [pairingCode, setPairingCode] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -99,12 +100,30 @@ export default function PairingPage({ user, onPairingSuccess }: PairingPageProps
     }
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    onLogout();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="text-white text-xl" />
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1"></div>
+            <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center">
+              <Users className="text-white text-xl" />
+            </div>
+            <div className="flex-1 flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-800">
             Connect with Your Partner

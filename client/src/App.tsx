@@ -80,7 +80,8 @@ function App() {
           {appState === "pairing" && user && (
             <PairingPage 
               user={user}
-              onPairingSuccess={handlePairingSuccess} 
+              onPairingSuccess={handlePairingSuccess}
+              onLogout={handleLogout}
             />
           )}
           
