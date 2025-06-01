@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Heart, Home, BarChart3, Settings } from "lucide-react";
+import { Bell, Home, BarChart3, Settings, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoodCard } from "@/components/mood-card";
 import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
+import { Logo } from "@/components/logo";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -171,9 +171,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
       <header className="bg-white/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
-              <Heart className="text-white text-sm" />
-            </div>
+            <Logo size="sm" />
             <span className="text-xl font-semibold text-gray-800">Hintly</span>
           </div>
           <div className="flex items-center space-x-4">

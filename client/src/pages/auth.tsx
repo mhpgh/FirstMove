@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { loginUser, registerUser, setStoredAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -70,8 +70,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-white text-xl" />
+          <div className="mx-auto mb-4">
+            <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-800">
             Welcome to Hintly

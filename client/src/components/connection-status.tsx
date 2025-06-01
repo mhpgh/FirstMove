@@ -21,7 +21,6 @@ export function ConnectionStatus({ partner, isConnected }: ConnectionStatusProps
     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Connected with</h2>
-        <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
       </div>
       <div className="flex items-center space-x-3">
         <div className="w-12 h-12 bg-gradient-to-br from-pink-300 to-purple-300 rounded-full flex items-center justify-center">
@@ -31,9 +30,7 @@ export function ConnectionStatus({ partner, isConnected }: ConnectionStatusProps
         </div>
         <div>
           <p className="font-medium text-gray-800">{partner.displayName}</p>
-          <p className="text-sm text-gray-500">
-            {isConnected ? "Online now" : "Offline"}
-          </p>
+          <p className="text-sm text-gray-500">Your partner</p>
         </div>
       </div>
     </div>

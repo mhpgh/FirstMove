@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Users, LogOut } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, logoutUser } from "@/lib/auth";
@@ -111,9 +112,7 @@ export default function PairingPage({ user, onPairingSuccess, onLogout }: Pairin
         <CardHeader className="text-center">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1"></div>
-            <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center">
-              <Users className="text-white text-xl" />
-            </div>
+            <Logo size="lg" />
             <div className="flex-1 flex justify-end">
               <Button
                 variant="ghost"
