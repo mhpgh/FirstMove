@@ -165,6 +165,14 @@ export default function PairingPage({ user, onPairingSuccess, onLogout }: Pairin
                     <p className="text-xs text-gray-500">
                       Share this code with your partner. It will expire once used.
                     </p>
+                    
+                    <Button
+                      onClick={() => window.location.reload()}
+                      variant="outline"
+                      className="w-full mt-2"
+                    >
+                      Check Connection Status
+                    </Button>
                   </div>
                 ) : (
                   <Button
