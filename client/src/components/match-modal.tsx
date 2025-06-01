@@ -28,21 +28,12 @@ export function MatchModal({
           <p className="text-gray-600 mb-6">
             You and {partnerName} are both feeling {moodType} right now
           </p>
-          <div className="space-y-3">
-            <Button 
-              onClick={onStartConversation}
-              className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90"
-            >
-              Start Conversation
-            </Button>
-            <Button 
-              onClick={onClose}
-              variant="secondary"
-              className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200"
-            >
-              Maybe Later
-            </Button>
-          </div>
+          <Button 
+            onClick={onClose}
+            className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90"
+          >
+            I'll take it from here!
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

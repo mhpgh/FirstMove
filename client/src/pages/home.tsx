@@ -39,12 +39,7 @@ interface Match {
   acknowledged: boolean;
 }
 
-const moodOptions = [
-  { emoji: "💕", label: "Romantic", moodType: "romantic" },
-  { emoji: "😊", label: "Playful", moodType: "playful" },
-  { emoji: "🔥", label: "Intimate", moodType: "intimate" },
-  { emoji: "🤗", label: "Cuddly", moodType: "cuddly" },
-];
+// Single mood option as per requirements
 
 interface HomePageProps {
   user: User;
@@ -53,9 +48,11 @@ interface HomePageProps {
 }
 
 export default function HomePage({ user, onNeedsPairing, onLogout }: HomePageProps) {
-  const [selectedMood, setSelectedMood] = useState<string>("");
+  const [isInMood, setIsInMood] = useState<boolean>(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
+  const [showConnectionPanel, setShowConnectionPanel] = useState(false);
+  const [nudgeDays, setNudgeDays] = useState<number>(7);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,25 +71,26 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     enabled: !!coupleData?.couple.id,
   });
 
-  // Set mood mutation
-  const setMoodMutation = useMutation({
-    mutationFn: async (moodType: string) => {
+  // Set "in the mood" mutation
+  const setInMoodMutation = useMutation({
+    mutationFn: async () => {
       const response = await apiRequest("POST", "/api/mood", {
         userId: user.id,
-        moodType,
+        moodType: "intimate",
       });
       return response.json();
     },
     onSuccess: () => {
+      setIsInMood(true);
       toast({
-        title: "Mood updated",
-        description: "Your mood has been shared privately with your partner",
+        title: "Got it!",
+        description: "We'll let you know when your partner feels the same way",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update mood",
+        description: error.message || "Failed to update status",
         variant: "destructive",
       });
     },
@@ -101,8 +99,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   // Handle WebSocket messages
   useEffect(() => {
     if (lastMessage?.type === "match") {
-      setCurrentMatch(lastMessage);
+      setCurrentMatch({
+        id: lastMessage.matchId,
+        coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
+        moodType: lastMessage.moodType,
+        matchedAt: lastMessage.matchedAt,
+        acknowledged: false
+      });
       setShowMatchModal(true);
+      setShowConnectionPanel(true);
       // Refresh matches data
       if (coupleData?.couple.id) {
         queryClient.invalidateQueries({
@@ -119,23 +124,23 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     }
   }, [isLoadingCouple, coupleData, onNeedsPairing]);
 
-  const handleMoodSelect = (moodType: string) => {
-    setSelectedMood(moodType);
-    setMoodMutation.mutate(moodType);
+  const handleInMoodPress = () => {
+    setInMoodMutation.mutate();
+  };
+
+  const handleConnectionConfirmed = () => {
+    setShowConnectionPanel(false);
+    setIsInMood(false);
+    // Log the actual connection
+    toast({
+      title: "Connection logged",
+      description: "Your intimate moment has been recorded",
+    });
   };
 
   const handleMatchModalClose = () => {
     setShowMatchModal(false);
     setCurrentMatch(null);
-  };
-
-  const handleStartConversation = () => {
-    // In a real app, this would navigate to a chat or messaging interface
-    toast({
-      title: "Feature coming soon",
-      description: "Chat functionality will be available in the next update",
-    });
-    handleMatchModalClose();
   };
 
   const handleLogout = () => {
@@ -200,72 +205,59 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           isConnected={isConnected} 
         />
 
-        {/* Mood Selection */}
-        <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
-            <p className="text-gray-500 text-sm mb-6">Share your mood privately with your partner</p>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {moodOptions.map((mood) => (
-                <MoodCard
-                  key={mood.moodType}
-                  emoji={mood.emoji}
-                  label={mood.label}
-                  moodType={mood.moodType}
-                  isSelected={selectedMood === mood.moodType}
-                  onClick={handleMoodSelect}
-                />
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
-                  <Heart className="text-white text-xs" />
-                </div>
-                <p className="text-sm text-gray-600">Your mood is only shared when there's a mutual match</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* In the Mood or Connection Panel */}
+        {showConnectionPanel ? (
+          <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">It's Time!</h3>
+              <p className="text-gray-500 text-sm mb-6">You both indicated you're in the mood</p>
+              
+              <Button
+                onClick={handleConnectionConfirmed}
+                className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90"
+              >
+                We Connected
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
+              <p className="text-gray-500 text-sm mb-6">Let your partner know privately</p>
+              
+              <Button
+                onClick={handleInMoodPress}
+                disabled={isInMood || setInMoodMutation.isPending}
+                className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {setInMoodMutation.isPending ? "Sending..." : isInMood ? "Waiting for partner..." : "In the Mood"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Activity Suggestions */}
+        {/* Nudge Me Panel */}
         <Card className="rounded-2xl shadow-sm mb-6">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Suggested Activities</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Nudge Me</h3>
+            <p className="text-gray-500 text-sm mb-4">How many days without a connection before we remind you?</p>
             
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-300 to-purple-300 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">🍷</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-700">Dinner & Wine</p>
-                  <p className="text-xs text-gray-500">Perfect for romantic evening</p>
-                </div>
-                <Button variant="ghost" size="sm" className="text-primary text-sm font-medium">
-                  Try
-                </Button>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-300 to-pink-300 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">💆</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-700">Massage Session</p>
-                  <p className="text-xs text-gray-500">Relax and connect</p>
-                </div>
-                <Button variant="ghost" size="sm" className="text-primary text-sm font-medium">
-                  Try
-                </Button>
-              </div>
+            <div className="flex items-center space-x-3">
+              <input
+                type="number"
+                min="1"
+                max="30"
+                value={nudgeDays}
+                onChange={(e) => setNudgeDays(Number(e.target.value))}
+                className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center"
+              />
+              <span className="text-gray-600">days</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Recent Matches */}
+        {/* Recent Connections */}
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -282,7 +274,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
                         <Heart className="text-white text-xs" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-700">Mutual Match</p>
+                        <p className="font-medium text-gray-700">Intimate Connection</p>
                         <p className="text-xs text-gray-500">
                           {new Date(match.matchedAt).toLocaleDateString()} at {new Date(match.matchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
@@ -296,8 +288,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">No recent matches</p>
-                <p className="text-xs text-gray-400 mt-1">Share your mood to start connecting</p>
+                <p className="text-gray-500">No recent connections</p>
+                <p className="text-xs text-gray-400 mt-1">Press "In the Mood" when you're feeling intimate</p>
               </div>
             )}
           </CardContent>
@@ -331,7 +323,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           onClose={handleMatchModalClose}
           partnerName={coupleData.partner.displayName}
           moodType={currentMatch.moodType}
-          onStartConversation={handleStartConversation}
+          onStartConversation={handleMatchModalClose}
         />
       )}
     </div>
