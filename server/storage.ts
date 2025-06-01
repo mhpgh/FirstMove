@@ -5,6 +5,8 @@ import {
   type Mood, type InsertMood,
   type Match, type InsertMatch
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -240,4 +242,169 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        password: hashedPassword,
+      })
+      .returning();
+    return user;
+  }
+
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.getUserByUsername(username);
+    if (!user) return null;
+    
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : null;
+  }
+
+  async getCouple(id: number): Promise<Couple | undefined> {
+    const [couple] = await db.select().from(couples).where(eq(couples.id, id));
+    return couple || undefined;
+  }
+
+  async getCoupleByUserId(userId: number): Promise<Couple | undefined> {
+    const [couple] = await db.select().from(couples).where(
+      eq(couples.user1Id, userId)
+    );
+    if (couple) return couple;
+    
+    const [couple2] = await db.select().from(couples).where(
+      eq(couples.user2Id, userId)
+    );
+    return couple2 || undefined;
+  }
+
+  async getCoupleByPairingCode(code: string): Promise<Couple | undefined> {
+    const [couple] = await db.select().from(couples).where(eq(couples.pairingCode, code));
+    return couple || undefined;
+  }
+
+  async createCouple(insertCouple: InsertCouple): Promise<Couple> {
+    const [couple] = await db
+      .insert(couples)
+      .values(insertCouple)
+      .returning();
+    return couple;
+  }
+
+  async updateCouple(coupleId: number, user2Id: number): Promise<void> {
+    await db
+      .update(couples)
+      .set({ user2Id })
+      .where(eq(couples.id, coupleId));
+  }
+
+  async activateCouple(coupleId: number): Promise<void> {
+    await db
+      .update(couples)
+      .set({ isActive: true, pairingCode: null })
+      .where(eq(couples.id, coupleId));
+  }
+
+  async generatePairingCode(userId: number): Promise<string> {
+    const code = Math.random().toString(36).substr(2, 6).toUpperCase();
+    
+    const existingCouple = await this.getCoupleByUserId(userId);
+    if (existingCouple) {
+      await db
+        .update(couples)
+        .set({ pairingCode: code, isActive: false, user2Id: 0 })
+        .where(eq(couples.id, existingCouple.id));
+    } else {
+      await this.createCouple({
+        user1Id: userId,
+        user2Id: 0,
+        pairingCode: code
+      });
+    }
+    
+    return code;
+  }
+
+  async getMood(id: number): Promise<Mood | undefined> {
+    const [mood] = await db.select().from(moods).where(eq(moods.id, id));
+    return mood || undefined;
+  }
+
+  async getActiveMoodsByUserId(userId: number): Promise<Mood[]> {
+    const now = new Date();
+    const result = await db.select().from(moods).where(
+      eq(moods.userId, userId)
+    );
+    return result.filter(mood => mood.isActive && mood.expiresAt > now);
+  }
+
+  async createMood(insertMood: InsertMood): Promise<Mood> {
+    const [mood] = await db
+      .insert(moods)
+      .values(insertMood)
+      .returning();
+    return mood;
+  }
+
+  async deactivateMood(moodId: number): Promise<void> {
+    await db
+      .update(moods)
+      .set({ isActive: false })
+      .where(eq(moods.id, moodId));
+  }
+
+  async deactivateUserMoods(userId: number): Promise<void> {
+    await db
+      .update(moods)
+      .set({ isActive: false })
+      .where(eq(moods.userId, userId));
+  }
+
+  async getMatch(id: number): Promise<Match | undefined> {
+    const [match] = await db.select().from(matches).where(eq(matches.id, id));
+    return match || undefined;
+  }
+
+  async getMatchesByCoupleId(coupleId: number): Promise<Match[]> {
+    return await db.select().from(matches).where(eq(matches.coupleId, coupleId));
+  }
+
+  async createMatch(insertMatch: InsertMatch): Promise<Match> {
+    const [match] = await db
+      .insert(matches)
+      .values(insertMatch)
+      .returning();
+    return match;
+  }
+
+  async acknowledgeMatch(matchId: number): Promise<void> {
+    await db
+      .update(matches)
+      .set({ acknowledged: true })
+      .where(eq(matches.id, matchId));
+  }
+
+  async getPartner(userId: number): Promise<User | undefined> {
+    const couple = await this.getCoupleByUserId(userId);
+    if (!couple || !couple.isActive) return undefined;
+    
+    const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+    if (partnerId === 0) return undefined;
+    
+    return this.getUser(partnerId);
+  }
+}
+
+export const storage = new DatabaseStorage();
