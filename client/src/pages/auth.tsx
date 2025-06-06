@@ -11,8 +11,8 @@ import { loginUser, registerUser, setStoredAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const authSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
   displayName: z.string().min(2, "Display name must be at least 2 characters").optional(),
 });
 
@@ -37,18 +37,24 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   });
 
   const onSubmit = async (data: AuthFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     setIsLoading(true);
     try {
       let user;
       if (isLogin) {
+        console.log("Attempting login for user:", data.username);
         user = await loginUser(data.username, data.password);
       } else {
         if (!data.displayName) {
           throw new Error("Display name is required for registration");
         }
+        console.log("Attempting registration for user:", data.username);
         user = await registerUser(data.username, data.password, data.displayName);
       }
       
+      console.log("Authentication successful:", user);
       setStoredAuth(user);
       toast({
         title: "Success",
@@ -56,6 +62,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       });
       onAuthSuccess();
     } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         title: "Error",
         description: error.message || "An error occurred",
