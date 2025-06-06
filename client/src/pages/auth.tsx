@@ -138,6 +138,12 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 type="submit"
                 className="w-full gradient-bg text-white hover:opacity-90"
                 disabled={isLoading}
+                onClick={(e) => {
+                  console.log("Button clicked!");
+                  console.log("Form valid:", form.formState.isValid);
+                  console.log("Form values:", form.getValues());
+                  console.log("Form errors:", form.formState.errors);
+                }}
               >
                 {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
               </Button>
