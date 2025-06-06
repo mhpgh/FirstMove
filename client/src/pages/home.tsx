@@ -276,14 +276,12 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     }
   }, [isLoadingCouple, coupleData, onNeedsPairing]);
 
-  // Sync mood state with backend data
+  // Initialize mood state from backend data on first load only
   useEffect(() => {
-    if (activeMoodData?.moods && activeMoodData.moods.length > 0) {
+    if (activeMoodData?.moods && activeMoodData.moods.length > 0 && !isInMood) {
       setIsInMood(true);
-    } else {
-      setIsInMood(false);
     }
-  }, [activeMoodData]);
+  }, [activeMoodData?.moods, isInMood]);
 
   // Check for unconnected matches only when we receive a WebSocket match notification
   // Don't automatically show connection panel based on historical matches
