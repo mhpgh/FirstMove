@@ -338,6 +338,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (matchingMood) {
       console.log(`Found matching mood: ${matchingMood.id}`);
       
+      // Check if there's a recent connected match (within last 5 minutes) - if so, don't create a new match
+      const existingMatches = await storage.getMatchesByCoupleId(couple.id);
+      const recentConnectedMatch = existingMatches.find(match => 
+        match.connected && 
+        new Date(match.connectedAt!).getTime() > Date.now() - 5 * 60 * 1000 // Within last 5 minutes
+      );
+      
+      if (recentConnectedMatch) {
+        console.log(`Recent connected match found (${recentConnectedMatch.id}), skipping new match creation`);
+        return;
+      }
+      
       // Delete any existing unconnected matches for this couple to keep only one active match
       await storage.deleteUnconnectedMatchesByCoupleId(couple.id);
       console.log(`Cleaned up old unconnected matches for couple ${couple.id}`);
