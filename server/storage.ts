@@ -274,9 +274,9 @@ export class DatabaseStorage implements IStorage {
     if (!couple || !couple.isActive) return undefined;
     
     const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
-    if (partnerId === 0) return undefined;
+    if (!partnerId) return undefined;
     
-    return this.getUser(partnerId);
+    return this.getUser(partnerId as number);
   }
 }
 

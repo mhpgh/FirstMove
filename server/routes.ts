@@ -324,6 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!couple || !couple.isActive) return;
 
     const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+    if (!partnerId) return; // No partner paired yet
     const partnerMood = await storage.getMoodByUserId(partnerId);
     
     console.log(`Checking matches for user ${userId}, partner ${partnerId}`);
