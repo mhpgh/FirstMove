@@ -1,4 +1,4 @@
-import logoImage from "@assets/Gemini_Generated_Image_sioge9sioge9siog.png";
+import logoImage from "@assets/icon.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
