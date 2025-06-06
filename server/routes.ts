@@ -175,6 +175,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/user/:id/moods/deactivate", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      await storage.deactivateUserMoods(userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Match routes
   app.get("/api/couple/:id/matches", async (req, res) => {
     try {
