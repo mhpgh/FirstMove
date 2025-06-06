@@ -251,7 +251,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       setShowConnectionPanel(false);
       setShowMatchModal(false);
       setCurrentMatch(null);
-      setIsInMood(false);
       
       // Show connection animation
       setShowConnectedAnimation(true);
@@ -259,6 +258,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       // Hide animation after 2 seconds and ensure clean state
       setTimeout(() => {
         setShowConnectedAnimation(false);
+        // Reset to clean "In the Mood" state after animation
+        setIsInMood(false);
       }, 2000);
       
       // Refresh data
