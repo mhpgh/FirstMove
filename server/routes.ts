@@ -198,7 +198,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/match/:id/connect", async (req, res) => {
     try {
       const matchId = parseInt(req.params.id);
-      await storage.connectMatch(matchId);
+      const match = await storage.getMatch(matchId);
+      
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      
+      // Get the couple and both users to check tracking preferences
+      const couple = await storage.getCouple(match.coupleId);
+      if (!couple) {
+        return res.status(404).json({ message: "Couple not found" });
+      }
+      
+      const user1 = await storage.getUser(couple.user1Id);
+      const user2 = await storage.getUser(couple.user2Id);
+      
+      if (!user1 || !user2) {
+        return res.status(404).json({ message: "Users not found" });
+      }
+      
+      // Only record connection if both users have tracking enabled
+      const shouldRecord = user1.keepTrack && user2.keepTrack;
+      
+      if (shouldRecord) {
+        await storage.connectMatch(matchId);
+      }
+      
+      res.json({ success: true, recorded: shouldRecord });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // User tracking preference routes
+  app.put("/api/user/:id/keep-track", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { keepTrack } = req.body;
+      
+      if (typeof keepTrack !== "boolean") {
+        return res.status(400).json({ message: "keepTrack must be a boolean" });
+      }
+      
+      // If turning off tracking, clear history
+      if (!keepTrack) {
+        await storage.clearUserHistory(userId);
+      }
+      
+      await storage.updateUserKeepTrack(userId, keepTrack);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

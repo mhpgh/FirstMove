@@ -84,10 +84,31 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id, 
       password: hashedPassword,
+      keepTrack: true,
       createdAt: new Date()
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUserKeepTrack(userId: number, keepTrack: boolean): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      this.users.set(userId, { ...user, keepTrack });
+    }
+  }
+
+  async clearUserHistory(userId: number): Promise<void> {
+    // Find the user's couple
+    const couple = await this.getCoupleByUserId(userId);
+    if (couple) {
+      // Remove all connected matches for this couple
+      for (const [matchId, match] of this.matches.entries()) {
+        if (match.coupleId === couple.id && match.connected) {
+          this.matches.delete(matchId);
+        }
+      }
+    }
   }
 
   async validateUser(username: string, password: string): Promise<User | null> {
@@ -420,6 +441,22 @@ export class DatabaseStorage implements IStorage {
         connectedAt: new Date()
       })
       .where(eq(matches.id, matchId));
+  }
+
+  async updateUserKeepTrack(userId: number, keepTrack: boolean): Promise<void> {
+    await db
+      .update(users)
+      .set({ keepTrack })
+      .where(eq(users.id, userId));
+  }
+
+  async clearUserHistory(userId: number): Promise<void> {
+    const couple = await this.getCoupleByUserId(userId);
+    if (couple) {
+      await db
+        .delete(matches)
+        .where(eq(matches.coupleId, couple.id));
+    }
   }
 
   async getPartner(userId: number): Promise<User | undefined> {

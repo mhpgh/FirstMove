@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Home, BarChart3, Settings, Heart, Clock } from "lucide-react";
+import { Bell, Home, BarChart3, Settings, Heart, Clock, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
 import { Logo } from "@/components/logo";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
