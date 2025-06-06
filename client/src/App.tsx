@@ -99,6 +99,14 @@ function App() {
               user={user}
               onNeedsPairing={handleNeedsPairing}
               onLogout={handleLogout}
+              onShowInsights={handleShowInsights}
+            />
+          )}
+
+          {appState === "insights" && user && (
+            <InsightsPage 
+              user={user}
+              onBack={handleBackToHome}
             />
           )}
         </div>

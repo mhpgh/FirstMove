@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Home, BarChart3, Settings, Heart, Clock, Info } from "lucide-react";
+import { Bell, Home, BarChart3, Settings, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch";
 import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
 import { Logo } from "@/components/logo";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -51,9 +50,10 @@ interface HomePageProps {
   user: User;
   onNeedsPairing: () => void;
   onLogout: () => void;
+  onShowInsights: () => void;
 }
 
-export default function HomePage({ user, onNeedsPairing, onLogout }: HomePageProps) {
+export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsights }: HomePageProps) {
   const [isInMood, setIsInMood] = useState<boolean>(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
@@ -61,8 +61,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
-  const [keepTrack, setKeepTrack] = useState<boolean>(true);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -81,12 +79,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     enabled: !!coupleData?.couple.id,
   });
 
-  // Initialize keepTrack state from user data
-  useEffect(() => {
-    if (user.keepTrack !== undefined) {
-      setKeepTrack(user.keepTrack);
-    }
-  }, [user.keepTrack]);
+
 
   // Set "in the mood" mutation
   const setInMoodMutation = useMutation({
@@ -383,69 +376,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           </CardContent>
         </Card>
 
-        {/* Recent Connections */}
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Recent Connections</h3>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Keep Track</span>
-                <Switch 
-                  checked={keepTrack} 
-                  onCheckedChange={handleKeepTrackToggle}
-                  disabled={updateKeepTrackMutation.isPending}
-                />
-              </div>
-            </div>
 
-            {/* Show tracking status message when partner tracking is off */}
-            {keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
-              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg mb-4">
-                <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <p className="text-sm text-blue-700">
-                  Your partner also needs to enable "Keep Track" to record connection history.
-                </p>
-              </div>
-            )}
-            
-            {keepTrack && (matchesData?.matches.filter(match => match.connected) || []).length > 0 ? (
-              <div className="space-y-3">
-                {(matchesData?.matches.filter(match => match.connected) || []).map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
-                        <Heart className="text-white text-xs" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Intimate Connection</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(match.matchedAt).toLocaleDateString()} at {new Date(match.matchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      Connected
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                {keepTrack ? (
-                  <>
-                    <p className="text-gray-500">No recent connections</p>
-                    <p className="text-xs text-gray-400 mt-1">Press "In the Mood" when you're feeling intimate</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-gray-500">Connection tracking is disabled</p>
-                    <p className="text-xs text-gray-400 mt-1">Enable "Keep Track" to record your intimate moments</p>
-                  </>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </main>
 
       {/* Bottom Navigation */}
@@ -456,7 +387,10 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
               <Home className="text-lg mb-1" />
               <span className="text-xs">Home</span>
             </button>
-            <button className="flex flex-col items-center py-2 px-3 text-gray-400">
+            <button 
+              onClick={onShowInsights}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
               <BarChart3 className="text-lg mb-1" />
               <span className="text-xs">Insights</span>
             </button>
