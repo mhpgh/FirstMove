@@ -102,20 +102,19 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate mood data to trigger refetch
+      // Set mood state immediately - WebSocket will override if there's a match
+      setIsInMood(true);
+      
+      // Invalidate queries
       queryClient.invalidateQueries({
         queryKey: [`/api/user/${user.id}/moods`],
       });
       
-      // Delay setting mood state to allow WebSocket match notification to arrive first
-      setTimeout(() => {
-        // Only set mood state if no match modal is showing (meaning no immediate match)
-        if (!showMatchModal) {
-          setIsInMood(true);
-        }
-      }, 100);
-      
-      // Don't show toast notification - let the UI state change speak for itself
+      if (coupleData?.couple.id) {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -208,6 +207,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   useEffect(() => {
     if (lastMessage?.type === "match") {
       console.log('Received match WebSocket message:', lastMessage);
+      // Immediately clear waiting state and show match
+      setIsInMood(false);
       setCurrentMatch({
         id: lastMessage.matchId,
         coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
@@ -219,7 +220,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       });
       setShowMatchModal(true);
       setShowConnectionPanel(true);
-      // Remove the duplicate notification - only show match modal, not toast
       // Refresh matches data
       if (coupleData?.couple.id) {
         queryClient.invalidateQueries({
