@@ -39,6 +39,8 @@ interface Match {
   moodType: string;
   matchedAt: string;
   acknowledged: boolean;
+  connected: boolean;
+  connectedAt: string | null;
 }
 
 // Single mood option as per requirements
