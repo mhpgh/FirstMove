@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Settings, ArrowLeft, Bell, Users, Trash2 } from "lucide-react";
+import { Settings, ArrowLeft, Bell, Users, Trash2, LogOut } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Logo } from "@/components/logo";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User } from "@/lib/auth";
+import { User, logoutUser } from "@/lib/auth";
 
 interface Partner {
   id: number;
@@ -36,9 +36,10 @@ interface SettingsPageProps {
   user: User;
   onBack: () => void;
   onNeedsPairing: () => void;
+  onLogout?: () => void;
 }
 
-export default function SettingsPage({ user, onBack, onNeedsPairing }: SettingsPageProps) {
+export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout }: SettingsPageProps) {
   const [keepTrack, setKeepTrack] = useState<boolean>(true);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
@@ -120,10 +121,17 @@ export default function SettingsPage({ user, onBack, onNeedsPairing }: SettingsP
     setShowDisconnectDialog(false);
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
@@ -133,15 +141,17 @@ export default function SettingsPage({ user, onBack, onNeedsPairing }: SettingsP
             <span>Back</span>
           </button>
           <div className="flex items-center space-x-2">
-            <Settings className="w-5 h-5 text-gray-600" />
-            <span className="text-lg font-semibold text-gray-800">Settings</span>
+            <Logo size="sm" />
           </div>
           <div className="w-16"></div> {/* Spacer for alignment */}
+        </div>
+        <div className="max-w-md mx-auto px-4 pb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
+      <main className="pb-20 p-4 max-w-md mx-auto space-y-6">
         
         {/* Keep Track Settings */}
         <Card className="rounded-2xl shadow-sm">
@@ -263,6 +273,30 @@ export default function SettingsPage({ user, onBack, onNeedsPairing }: SettingsP
             </CardContent>
           </Card>
         )}
+
+        {/* Account Management */}
+        <Card className="rounded-2xl shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                <LogOut className="w-5 h-5 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Account</h3>
+                <p className="text-sm text-gray-500">Manage your account</p>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="w-full"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
       </main>
 
       {/* Disconnect Confirmation Dialog */}

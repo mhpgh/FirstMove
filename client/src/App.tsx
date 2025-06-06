@@ -121,6 +121,7 @@ function App() {
               user={user}
               onBack={handleBackToHome}
               onNeedsPairing={handleNeedsPairing}
+              onLogout={handleLogout}
             />
           )}
         </div>
