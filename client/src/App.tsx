@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getStoredAuth, setStoredAuth, type User } from "@/lib/auth";
+import { NotificationProvider } from "@/contexts/notification-context";
+import { NotificationBell } from "@/components/notification-bell";
 import AuthPage from "@/pages/auth";
 import PairingPage from "@/pages/pairing";
 import HomePage from "@/pages/home";
@@ -86,48 +88,57 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen">
-          {appState === "auth" && (
-            <AuthPage onAuthSuccess={handleAuthSuccess} />
-          )}
-          
-          {appState === "pairing" && user && (
-            <PairingPage 
-              user={user}
-              onPairingSuccess={handlePairingSuccess}
-              onLogout={handleLogout}
-            />
-          )}
-          
-          {appState === "home" && user && (
-            <HomePage 
-              user={user}
-              onNeedsPairing={handleNeedsPairing}
-              onLogout={handleLogout}
-              onShowInsights={handleShowInsights}
-              onShowSettings={handleShowSettings}
-            />
-          )}
+        <NotificationProvider>
+          <div className="min-h-screen">
+            {/* Header with notification bell for authenticated pages */}
+            {user && appState !== "auth" && (
+              <div className="fixed top-0 right-0 z-50 p-4">
+                <NotificationBell />
+              </div>
+            )}
 
-          {appState === "insights" && user && (
-            <InsightsPage 
-              user={user}
-              onBack={handleBackToHome}
-              onShowSettings={handleShowSettings}
-            />
-          )}
+            {appState === "auth" && (
+              <AuthPage onAuthSuccess={handleAuthSuccess} />
+            )}
+            
+            {appState === "pairing" && user && (
+              <PairingPage 
+                user={user}
+                onPairingSuccess={handlePairingSuccess}
+                onLogout={handleLogout}
+              />
+            )}
+            
+            {appState === "home" && user && (
+              <HomePage 
+                user={user}
+                onNeedsPairing={handleNeedsPairing}
+                onLogout={handleLogout}
+                onShowInsights={handleShowInsights}
+                onShowSettings={handleShowSettings}
+              />
+            )}
 
-          {appState === "settings" && user && (
-            <SettingsPage 
-              user={user}
-              onBack={handleBackToHome}
-              onNeedsPairing={handleNeedsPairing}
-              onLogout={handleLogout}
-              onShowInsights={handleShowInsights}
-            />
-          )}
-        </div>
-        <Toaster />
+            {appState === "insights" && user && (
+              <InsightsPage 
+                user={user}
+                onBack={handleBackToHome}
+                onShowSettings={handleShowSettings}
+              />
+            )}
+
+            {appState === "settings" && user && (
+              <SettingsPage 
+                user={user}
+                onBack={handleBackToHome}
+                onNeedsPairing={handleNeedsPairing}
+                onLogout={handleLogout}
+                onShowInsights={handleShowInsights}
+              />
+            )}
+          </div>
+          <Toaster />
+        </NotificationProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

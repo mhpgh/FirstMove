@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 
@@ -20,6 +20,10 @@ export function MatchModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm mx-auto">
+        <DialogTitle className="sr-only">Match Found</DialogTitle>
+        <DialogDescription className="sr-only">
+          You and {partnerName} are both ready to connect
+        </DialogDescription>
         <div className="text-center animate-slide-up">
           <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
             <Heart className="text-white text-xl" />
