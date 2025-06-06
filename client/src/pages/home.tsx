@@ -136,7 +136,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   // Cancel mood mutation
   const cancelMoodMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/user/${user.id}/moods/deactivate`);
+      const response = await apiRequest("PUT", `/api/user/${user.id}/moods/deactivate`);
       return response;
     },
     onSuccess: () => {
@@ -158,7 +158,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       
       toast({
         title: "Cancelled",
-        description: "Your mood has been cancelled",
+        description: "Your first move has been cancelled",
       });
     },
     onError: (error: any) => {
