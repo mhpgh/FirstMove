@@ -53,6 +53,14 @@ interface HomePageProps {
   onShowInsights: () => void;
 }
 
+interface Notification {
+  id: string;
+  type: 'match' | 'connection';
+  message: string;
+  timestamp: Date;
+  read: boolean;
+}
+
 export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsights }: HomePageProps) {
   const [isInMood, setIsInMood] = useState<boolean>(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
@@ -62,6 +70,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
   const [showConnectedAnimation, setShowConnectedAnimation] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -225,6 +235,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   useEffect(() => {
     if (lastMessage?.type === "match") {
       console.log('Received match WebSocket message:', lastMessage);
+      // Add notification for match
+      addNotification('match', `You and ${coupleData?.partner?.displayName || 'your partner'} are both ready to connect!`);
+      
       // Immediately clear waiting state and show match
       setIsInMood(false);
       setCurrentMatch({
@@ -246,6 +259,12 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       }
     } else if (lastMessage?.type === "connection") {
       console.log('Received connection WebSocket message:', lastMessage);
+      // Add notification for connection
+      const message = lastMessage.recorded 
+        ? `Connection with ${coupleData?.partner?.displayName || 'your partner'} has been logged`
+        : `Connected with ${coupleData?.partner?.displayName || 'your partner'} (not recorded)`;
+      addNotification('connection', message);
+      
       // Immediately clear all connection-related state
       setShowConnectionPanel(false);
       setShowMatchModal(false);
@@ -361,6 +380,41 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     onLogout();
   };
 
+  // Notification functions
+  const addNotification = (type: 'match' | 'connection', message: string) => {
+    const newNotification: Notification = {
+      id: `${Date.now()}-${Math.random()}`,
+      type,
+      message,
+      timestamp: new Date(),
+      read: false
+    };
+    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]); // Keep only 10 most recent
+  };
+
+  const markNotificationsAsRead = () => {
+    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showNotifications && !target.closest('[data-notification-panel]')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
+
 
 
   if (isLoadingCouple) {
@@ -391,11 +445,74 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Bell className="text-gray-400 text-lg" />
-              {recentMatches.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center notification-badge">
-                  {recentMatches.length}
-                </span>
+              <button 
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications) {
+                    markNotificationsAsRead();
+                  }
+                }}
+                className="relative p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <Bell className="text-gray-400 text-lg" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center notification-badge">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {/* Notification Panel */}
+              {showNotifications && (
+                <div className="absolute top-10 right-0 w-80 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-hidden">
+                  <div className="p-4 border-b bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-800">Notifications</h3>
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={clearNotifications}
+                          className="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">
+                        No notifications yet
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-b last:border-b-0 ${
+                            !notification.read ? 'bg-blue-50' : 'bg-white'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                              notification.type === 'match' ? 'bg-pink-500' : 'bg-green-500'
+                            }`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-800 break-words">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {notification.timestamp.toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               )}
             </div>
             <button 
@@ -439,7 +556,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         ) : (
           <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ready to connect?</h3>
               
               {isInMood ? (
                 <div className="space-y-4">
