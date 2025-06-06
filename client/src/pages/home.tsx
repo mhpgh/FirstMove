@@ -521,7 +521,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       {/* Main Content */}
       <main className="pt-20 pb-20 px-4 max-w-md mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Ready to connect?</h1>
         </div>
         {/* Connection Status */}
         <ConnectionStatus 
@@ -550,7 +549,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         ) : (
           <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Ready to connect?</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Make the First Move</h3>
               
               {isInMood ? (
                 <div className="space-y-4">
@@ -564,7 +563,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Clock className="w-4 h-4 inline mr-2" />
-                      How long will you be in the mood?
+                      Open to connect for:
                     </label>
                     <Select value={selectedDuration} onValueChange={setSelectedDuration}>
                       <SelectTrigger className="w-full">
@@ -602,7 +601,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Clock className="w-4 h-4 inline mr-2" />
-                      How long will you be in the mood?
+                      Open to connect for:
                     </label>
                     <Select value={selectedDuration} onValueChange={setSelectedDuration}>
                       <SelectTrigger className="w-full">
@@ -622,7 +621,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                     disabled={setInMoodMutation.isPending}
                     className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
                   >
-                    {setInMoodMutation.isPending ? "Setting mood..." : "In the Mood"}
+                    {setInMoodMutation.isPending ? "Setting mood..." : "I'm ready"}
                   </Button>
                 </div>
               )}
