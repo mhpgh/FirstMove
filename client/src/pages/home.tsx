@@ -180,7 +180,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       // Clear connection state immediately
       setShowConnectionPanel(false);
       setCurrentMatch(null);
-      setIsInMood(false);
       
       // Show the connected animation
       setShowConnectedAnimation(true);
@@ -230,8 +229,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       // Add notification for match
       addNotification('match', `You and ${coupleData?.partner?.displayName || 'your partner'} are both ready to connect!`);
       
-      // Immediately clear waiting state and show match
-      setIsInMood(false);
+      // Show match modal
       setCurrentMatch({
         id: lastMessage.matchId,
         coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
@@ -268,8 +266,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       // Hide animation after 2 seconds and ensure clean state
       setTimeout(() => {
         setShowConnectedAnimation(false);
-        // Reset to clean "In the Mood" state after animation
-        setIsInMood(false);
+        // Animation complete
       }, 2000);
       
       // Refresh data immediately to sync with server state
@@ -318,12 +315,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     }
   }, [isLoadingCouple, coupleData, onNeedsPairing]);
 
-  // Initialize mood state from backend data on first load only
-  useEffect(() => {
-    if (activeMoodData?.moods && activeMoodData.moods.length > 0 && !isInMood) {
-      setIsInMood(true);
-    }
-  }, [activeMoodData?.moods, isInMood]);
+  // Mood state is now derived from server data, no initialization needed
 
   // Check for unconnected matches only when we receive a WebSocket match notification
   // Don't automatically show connection panel based on historical matches
