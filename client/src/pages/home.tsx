@@ -275,7 +275,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // Check for new matches after setting mood (fallback if WebSocket fails)
   useEffect(() => {
-    if (isInMood && matchesData?.matches && coupleData?.couple.id && !showMatchModal) {
+    if (isInMood && matchesData?.matches && coupleData?.couple.id && !showMatchModal && !showConnectedAnimation) {
       const recentMatch = matchesData.matches.find(match => 
         !match.connected && 
         new Date(match.matchedAt).getTime() > Date.now() - 2 * 60 * 1000 && // Within last 2 minutes
@@ -289,7 +289,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         setShowConnectionPanel(true);
       }
     }
-  }, [matchesData, isInMood, currentMatch, coupleData, showMatchModal]);
+  }, [matchesData, isInMood, currentMatch, coupleData, showMatchModal, showConnectedAnimation]);
 
   // Check if user needs pairing
   useEffect(() => {
