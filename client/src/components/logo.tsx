@@ -13,7 +13,7 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
   };
 
   return (
-    <div className={`${sizeClasses[size]} ${className} relative flex items-center justify-center`}>
+    <div className={`${sizeClasses[size]} ${className} gradient-bg rounded-full relative flex items-center justify-center`}>
       <img 
         src={logoImage} 
         alt="Hintly Logo" 

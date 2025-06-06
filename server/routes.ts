@@ -239,6 +239,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deactivateUserMoods(couple.user1Id);
       await storage.deactivateUserMoods(couple.user2Id);
       
+      // Notify both users via WebSocket that connection was made
+      const user1Ws = userConnections.get(couple.user1Id);
+      const user2Ws = userConnections.get(couple.user2Id);
+      
+      const connectionNotification = {
+        type: 'connection',
+        matchId: match.id,
+        moodType: match.moodType,
+        recorded: shouldRecord
+      };
+      
+      if (user1Ws && user1Ws.readyState === WebSocket.OPEN) {
+        user1Ws.send(JSON.stringify(connectionNotification));
+      }
+      
+      if (user2Ws && user2Ws.readyState === WebSocket.OPEN) {
+        user2Ws.send(JSON.stringify(connectionNotification));
+      }
+      
       res.json({ success: true, recorded: shouldRecord });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

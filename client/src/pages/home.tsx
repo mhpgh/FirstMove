@@ -221,8 +221,30 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
         });
       }
+    } else if (lastMessage?.type === "connection") {
+      console.log('Received connection WebSocket message:', lastMessage);
+      // Both users return to "In the Mood" state
+      setShowConnectionPanel(false);
+      setShowMatchModal(false);
+      setCurrentMatch(null);
+      setShowConnectedAnimation(true);
+      
+      // Hide animation after 2 seconds
+      setTimeout(() => {
+        setShowConnectedAnimation(false);
+      }, 2000);
+      
+      // Refresh data
+      if (coupleData?.couple.id) {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`/api/user/${user.id}/moods`],
+        });
+      }
     }
-  }, [lastMessage, coupleData, queryClient]);
+  }, [lastMessage, coupleData, queryClient, user.id]);
 
   // Check for new matches after setting mood (fallback if WebSocket fails)
   useEffect(() => {
