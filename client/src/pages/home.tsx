@@ -169,20 +169,27 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: (result) => {
+      // Clear connection state immediately
+      setShowConnectionPanel(false);
+      setCurrentMatch(null);
+      setIsInMood(false);
+      
       // Show the connected animation
       setShowConnectedAnimation(true);
       
-      // Show appropriate toast message
-      if (result.recorded) {
-        toast({
-          title: "Connection logged",
-          description: "Your intimate moment has been recorded",
-        });
-      } else {
-        toast({
-          title: "Connection confirmed",
-          description: "Both users need to enable 'Keep Track' to record history",
-        });
+      // Show appropriate toast message (only if not already connected)
+      if (!result.alreadyConnected) {
+        if (result.recorded) {
+          toast({
+            title: "Connection logged",
+            description: "Your intimate moment has been recorded",
+          });
+        } else {
+          toast({
+            title: "Connection confirmed",
+            description: "Both users need to enable 'Keep Track' to record history",
+          });
+        }
       }
       
       // Reset to original state after animation

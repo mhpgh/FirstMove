@@ -215,6 +215,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Match not found" });
       }
       
+      // Check if this match is already connected
+      if (match.connected) {
+        return res.status(200).json({ success: true, recorded: true, alreadyConnected: true });
+      }
+      
       // Get the couple and both users to check tracking preferences
       const couple = await storage.getCouple(match.coupleId);
       if (!couple) {
