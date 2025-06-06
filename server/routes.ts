@@ -225,6 +225,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.connectMatch(matchId);
       }
       
+      // Deactivate moods for both users after connection
+      await storage.deactivateUserMoods(couple.user1Id);
+      await storage.deactivateUserMoods(couple.user2Id);
+      
       res.json({ success: true, recorded: shouldRecord });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

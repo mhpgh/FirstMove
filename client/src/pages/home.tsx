@@ -102,7 +102,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: () => {
-      setIsInMood(true);
+      // Invalidate mood data to trigger refetch
+      queryClient.invalidateQueries({
+        queryKey: [`/api/user/${user.id}/moods`],
+      });
+      
       toast({
         title: "Got it!",
         description: "We'll let you know when your partner feels the same way",
@@ -145,15 +149,19 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         setShowConnectedAnimation(false);
         setShowConnectionPanel(false);
         setCurrentMatch(null);
-        setIsInMood(false);
       }, 2000);
 
-      // Refresh matches data
+      // Refresh matches data and mood data
       if (coupleData?.couple.id) {
         queryClient.invalidateQueries({
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
         });
       }
+      
+      // Invalidate mood data to properly reset the UI state
+      queryClient.invalidateQueries({
+        queryKey: [`/api/user/${user.id}/moods`],
+      });
     },
     onError: (error: any) => {
       toast({
@@ -196,6 +204,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       onNeedsPairing();
     }
   }, [isLoadingCouple, coupleData, onNeedsPairing]);
+
+  // Sync isInMood state with backend mood data
+  useEffect(() => {
+    if (activeMoodData?.moods && activeMoodData.moods.length > 0) {
+      setIsInMood(true);
+    } else {
+      setIsInMood(false);
+    }
+  }, [activeMoodData]);
 
   const handleInMoodPress = () => {
     setInMoodMutation.mutate();
