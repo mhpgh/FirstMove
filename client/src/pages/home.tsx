@@ -110,32 +110,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     },
   });
 
-  // Update keep track preference mutation
-  const updateKeepTrackMutation = useMutation({
-    mutationFn: async (newKeepTrack: boolean) => {
-      const response = await apiRequest("PUT", `/api/user/${user.id}/keep-track`, {
-        keepTrack: newKeepTrack,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}/couple`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/couple/${coupleData?.couple.id}/matches`] });
-      toast({
-        title: "Settings updated",
-        description: keepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update tracking preference",
-        variant: "destructive",
-      });
-      // Reset the switch on error
-      setKeepTrack(!keepTrack);
-    },
-  });
+
 
   // Handle WebSocket messages
   useEffect(() => {
@@ -218,27 +193,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     onLogout();
   };
 
-  const handleKeepTrackToggle = (newValue: boolean) => {
-    if (!newValue && (matchesData?.matches.filter(match => match.connected) || []).length > 0) {
-      // Show confirmation dialog if turning off and history exists
-      setShowConfirmDialog(true);
-    } else {
-      // No history or turning on, proceed immediately
-      setKeepTrack(newValue);
-      updateKeepTrackMutation.mutate(newValue);
-    }
-  };
 
-  const handleConfirmDisableTracking = () => {
-    setShowConfirmDialog(false);
-    setKeepTrack(false);
-    updateKeepTrackMutation.mutate(false);
-  };
-
-  const handleCancelDisableTracking = () => {
-    setShowConfirmDialog(false);
-    // Keep the switch in the "on" position
-  };
 
   if (isLoadingCouple) {
     return (
@@ -413,17 +368,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         />
       )}
 
-      {/* Confirm Dialog for Disabling Keep Track */}
-      <ConfirmDialog
-        isOpen={showConfirmDialog}
-        onClose={handleCancelDisableTracking}
-        onConfirm={handleConfirmDisableTracking}
-        title="Disable Connection Tracking?"
-        description="This will permanently delete all your connection history. This action cannot be undone."
-        confirmText="Delete History"
-        cancelText="Keep Tracking"
-        variant="destructive"
-      />
     </div>
   );
 }

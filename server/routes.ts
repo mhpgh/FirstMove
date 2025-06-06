@@ -145,13 +145,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Deactivate any existing moods for this user
       await storage.deactivateUserMoods(userId);
       
-      // Create new mood that expires in 2 hours
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 2);
+      // Use the duration from the request body
+      const duration = req.body.duration || 60; // Default to 60 minutes
+      const expiresAt = new Date(req.body.expiresAt || Date.now() + duration * 60 * 1000);
       
       const mood = await storage.createMood({
         userId,
         moodType,
+        duration,
         expiresAt
       });
       
