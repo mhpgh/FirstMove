@@ -190,7 +190,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         if (result.recorded) {
           toast({
             title: "Connection logged",
-            description: "Your intimate moment has been recorded",
+            description: "Your connection has been recorded",
           });
         } else {
           toast({
