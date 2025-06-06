@@ -555,9 +555,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                 <div className="space-y-4">
                   <div className="text-center p-4 bg-blue-50 rounded-xl">
                     <p className="text-sm text-blue-700 mb-2">
-                      You're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`}
+                      You're open to connect{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`}
                     </p>
-                    <p className="text-xs text-blue-600">Waiting for your partner to feel the same way...</p>
                   </div>
                   
                   <div className="mb-4">
@@ -616,6 +615,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                       </SelectContent>
                     </Select>
                   </div>
+                  
+                  <p className="text-xs text-gray-500 mb-4">
+                    We won't let {coupleData?.partner?.displayName || 'your partner'} know unless they feel the same way too.
+                  </p>
+                  
                   <Button
                     onClick={handleInMoodPress}
                     disabled={setInMoodMutation.isPending}
