@@ -298,12 +298,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   // Check for unconnected matches only when we receive a WebSocket match notification
   // Don't automatically show connection panel based on historical matches
   useEffect(() => {
-    // Only reset connection panel if there are no active moods
-    if (!isInMood && showConnectionPanel) {
+    // Only reset connection panel if user manually cancelled (not when match was found)
+    if (!isInMood && showConnectionPanel && !currentMatch) {
       setShowConnectionPanel(false);
-      setCurrentMatch(null);
     }
-  }, [isInMood, showConnectionPanel]);
+  }, [isInMood, showConnectionPanel, currentMatch]);
 
   const handleInMoodPress = () => {
     setInMoodMutation.mutate();
