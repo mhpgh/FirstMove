@@ -298,18 +298,13 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
                         hour12: true
                       });
 
-                      const filteredMatches = matchesData.matches.filter(m => m.recorded && m.connectedAt);
                       return (
-                        <div key={match.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-800">{dateLabel}</p>
-                              <p className="text-xs text-gray-500">{timeLabel}</p>
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            #{filteredMatches.length - index}
+                        <div key={match.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm font-medium text-gray-800">{dateLabel}</p>
+                            <span className="text-gray-300">•</span>
+                            <p className="text-sm text-gray-500">{timeLabel}</p>
                           </div>
                         </div>
                       );
