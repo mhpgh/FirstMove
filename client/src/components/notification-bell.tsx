@@ -27,7 +27,7 @@ export function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-800 transition-colors"
+        className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors bg-white rounded-full"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
