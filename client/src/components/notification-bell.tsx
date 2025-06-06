@@ -27,7 +27,7 @@ export function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors bg-white rounded-full"
+        className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors bg-white rounded-full pt-[0px] pb-[0px] pl-[0px] pr-[0px]"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
@@ -36,7 +36,6 @@ export function NotificationBell() {
           </span>
         )}
       </button>
-
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
           <div className="p-3 border-b border-gray-200 flex justify-between items-center">
