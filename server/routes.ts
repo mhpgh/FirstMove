@@ -136,14 +136,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mood routes
   app.post("/api/mood", async (req, res) => {
     try {
-      const { userId, moodType } = req.body;
+      const { userId } = req.body;
       
-      if (!userId || !moodType) {
-        return res.status(400).json({ message: "User ID and mood type are required" });
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
-      
-      // Deactivate any existing moods for this user
-      await storage.deactivateUserMoods(userId);
       
       // Use the duration from the request body
       const duration = req.body.duration || 60; // Default to 60 minutes
@@ -151,13 +148,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const mood = await storage.createMood({
         userId,
-        moodType,
         duration,
         expiresAt
       });
       
       // Check for potential matches
-      await checkForMatches(userId, moodType);
+      await checkForMatches(userId);
       
       res.json({ mood });
     } catch (error) {
@@ -168,8 +164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/:id/moods", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
-      const moods = await storage.getActiveMoodsByUserId(userId);
-      res.json({ moods });
+      const mood = await storage.getMoodByUserId(userId);
+      res.json({ moods: mood ? [mood] : [] });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }
@@ -178,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/user/:id/moods/deactivate", async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
-      await storage.deactivateUserMoods(userId);
+      await storage.deleteUserMood(userId);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
@@ -239,9 +235,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only record in history if both users have tracking enabled
       const shouldRecord = user1.keepTrack && user2.keepTrack;
       
-      // Deactivate moods for both users after connection
-      await storage.deactivateUserMoods(couple.user1Id);
-      await storage.deactivateUserMoods(couple.user2Id);
+      // Delete moods for both users after connection
+      await storage.deleteUserMood(couple.user1Id);
+      await storage.deleteUserMood(couple.user2Id);
       
       // Notify both users via WebSocket that connection was made
       const user1Ws = userConnections.get(couple.user1Id);
@@ -250,7 +246,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const connectionNotification = {
         type: 'connection',
         matchId: match.id,
-        moodType: match.moodType,
         recorded: shouldRecord
       };
       
