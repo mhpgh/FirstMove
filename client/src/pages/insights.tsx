@@ -264,6 +264,69 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
           </CardContent>
         </Card>
 
+        {/* Connection History List */}
+        {user.keepTrack && coupleData?.partner?.keepTrack && (
+          <Card className="rounded-2xl shadow-sm mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Connection History</h3>
+              {matches && matches.length > 0 ? (
+                <div className="space-y-3">
+                  {matches
+                    .filter(match => match.recorded && match.connectedAt)
+                    .sort((a, b) => new Date(b.connectedAt!).getTime() - new Date(a.connectedAt!).getTime())
+                    .map((match, index) => {
+                      const connectionDate = new Date(match.connectedAt!);
+                      const isToday = connectionDate.toDateString() === new Date().toDateString();
+                      const isYesterday = connectionDate.toDateString() === new Date(Date.now() - 86400000).toDateString();
+                      
+                      let dateLabel;
+                      if (isToday) {
+                        dateLabel = 'Today';
+                      } else if (isYesterday) {
+                        dateLabel = 'Yesterday';
+                      } else {
+                        dateLabel = connectionDate.toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric'
+                        });
+                      }
+                      
+                      const timeLabel = connectionDate.toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      });
+
+                      return (
+                        <div key={match.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">{dateLabel}</p>
+                              <p className="text-xs text-gray-500">{timeLabel}</p>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            #{matches.filter(m => m.recorded && m.connectedAt).length - index}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-500 mb-1">No connections recorded yet</p>
+                  <p className="text-xs text-gray-400">Your connection history will appear here</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Information */}
         {!user.keepTrack && (
           <Card className="rounded-2xl shadow-sm border-blue-200 bg-blue-50">
