@@ -133,6 +133,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/user/:id/couple", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const couple = await storage.getCoupleByUserId(userId);
+      
+      if (!couple) {
+        return res.status(404).json({ message: "No couple found" });
+      }
+      
+      // Clear user's history
+      await storage.clearUserHistory(userId);
+      
+      // Get partner ID for cleanup
+      const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+      if (partnerId) {
+        await storage.clearUserHistory(partnerId);
+      }
+      
+      // Delete all matches for this couple
+      await storage.deleteUnconnectedMatchesByCoupleId(couple.id);
+      const matches = await storage.getMatchesByCoupleId(couple.id);
+      for (const match of matches) {
+        await storage.deleteMatch(match.id);
+      }
+      
+      // Deactivate the couple
+      await storage.deactivateCouple(couple.id);
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Mood routes
   app.post("/api/mood", async (req, res) => {
     try {

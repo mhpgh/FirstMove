@@ -8,8 +8,9 @@ import AuthPage from "@/pages/auth";
 import PairingPage from "@/pages/pairing";
 import HomePage from "@/pages/home";
 import InsightsPage from "@/pages/insights";
+import SettingsPage from "@/pages/settings";
 
-type AppState = "loading" | "auth" | "pairing" | "home" | "insights";
+type AppState = "loading" | "auth" | "pairing" | "home" | "insights" | "settings";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("loading");

@@ -25,6 +25,7 @@ export interface IStorage {
   createCouple(couple: InsertCouple): Promise<Couple>;
   updateCouple(coupleId: number, user2Id: number): Promise<void>;
   activateCouple(coupleId: number): Promise<void>;
+  deactivateCouple(coupleId: number): Promise<void>;
   generatePairingCode(userId: number): Promise<string>;
   
   // Mood methods
@@ -133,6 +134,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(couples)
       .set({ isActive: true })
+      .where(eq(couples.id, coupleId));
+  }
+
+  async deactivateCouple(coupleId: number): Promise<void> {
+    await db
+      .update(couples)
+      .set({ isActive: false })
       .where(eq(couples.id, coupleId));
   }
 
