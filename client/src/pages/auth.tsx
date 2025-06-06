@@ -37,14 +37,11 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   });
 
   const onSubmit = async (data: AuthFormData) => {
-    console.log('Form submission started', { username: data.username, passwordLength: data.password?.length });
     setIsLoading(true);
     try {
       let user;
       if (isLogin) {
-        console.log('Attempting login with:', { username: data.username, passwordLength: data.password?.length });
         user = await loginUser(data.username, data.password);
-        console.log('Login response:', user);
       } else {
         if (!data.displayName) {
           throw new Error("Display name is required for registration");
@@ -59,7 +56,6 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       });
       onAuthSuccess();
     } catch (error: any) {
-      console.error('Authentication error:', error);
       toast({
         title: "Error",
         description: error.message || "An error occurred",
@@ -135,10 +131,6 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 type="submit"
                 className="w-full gradient-bg text-white hover:opacity-90"
                 disabled={isLoading}
-                onClick={() => {
-                  console.log('Button clicked, form errors:', form.formState.errors);
-                  console.log('Form values:', form.getValues());
-                }}
               >
                 {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
               </Button>
