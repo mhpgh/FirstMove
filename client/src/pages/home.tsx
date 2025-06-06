@@ -301,7 +301,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Clock className="w-4 h-4 inline mr-2" />
-                  How long are you in the mood?
+                  How long will you be in the mood?
                 </label>
                 <Select value={selectedDuration} onValueChange={setSelectedDuration}>
                   <SelectTrigger className="w-full">

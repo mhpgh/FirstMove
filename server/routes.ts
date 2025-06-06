@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/match/:id/connect", async (req, res) => {
+  app.put("/api/match/:id/connect", async (req, res) => {
     try {
       const matchId = parseInt(req.params.id);
       const match = await storage.getMatch(matchId);
@@ -290,15 +290,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
     const partnerMoods = await storage.getActiveMoodsByUserId(partnerId);
     
-    // Check if partner has a matching mood
+    console.log(`Checking matches for user ${userId}, partner ${partnerId}`);
+    console.log(`Partner moods:`, partnerMoods);
+    
+    // Check if partner has a matching mood that was created BEFORE this user's mood
     const matchingMood = partnerMoods.find(mood => mood.moodType === moodType);
     
     if (matchingMood) {
+      console.log(`Found matching mood: ${matchingMood.id}`);
+      
+      // Check if a match already exists for this couple and mood type
+      const existingMatches = await storage.getMatchesByCoupleId(couple.id);
+      const recentMatch = existingMatches.find(match => 
+        match.moodType === moodType && 
+        !match.connected &&
+        new Date(match.matchedAt).getTime() > Date.now() - 5 * 60 * 1000 // Within last 5 minutes
+      );
+      
+      if (recentMatch) {
+        console.log(`Match already exists: ${recentMatch.id}`);
+        return;
+      }
+      
       // Create a match
       const match = await storage.createMatch({
         coupleId: couple.id,
         moodType
       });
+      
+      console.log(`Created new match: ${match.id}`);
       
       // Notify both users via WebSocket
       const userWs = userConnections.get(userId);
@@ -318,6 +338,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (partnerWs && partnerWs.readyState === WebSocket.OPEN) {
         partnerWs.send(JSON.stringify(matchNotification));
       }
+    } else {
+      console.log(`No matching mood found for ${moodType}`);
     }
   }
 
