@@ -80,6 +80,12 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     enabled: !!coupleData?.couple.id,
   });
 
+  // Fetch active mood for current user
+  const { data: activeMoodData } = useQuery<{ moods: any[] }>({
+    queryKey: [`/api/user/${user.id}/moods`],
+    enabled: !!user.id,
+  });
+
 
 
   // Set "in the mood" mutation
@@ -117,9 +123,22 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       const response = await apiRequest("PUT", `/api/match/${matchId}/connect`, {});
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       // Show the connected animation
       setShowConnectedAnimation(true);
+      
+      // Show appropriate toast message
+      if (result.recorded) {
+        toast({
+          title: "Connection logged",
+          description: "Your intimate moment has been recorded",
+        });
+      } else {
+        toast({
+          title: "Connection confirmed",
+          description: "Both users need to enable 'Keep Track' to record history",
+        });
+      }
       
       // Reset to original state after animation
       setTimeout(() => {
@@ -261,7 +280,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">It's Time!</h3>
               <p className="text-gray-500 text-sm mb-6">
-                You both indicated you're in the mood{currentMatch && ` until ${new Date(Date.now() + parseInt(selectedDuration) * 60 * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                You both indicated you're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
               </p>
               
               <Button
@@ -374,6 +393,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           moodType={currentMatch.moodType}
           onStartConversation={handleMatchModalClose}
         />
+      )}
+
+      {/* Connected Animation Overlay */}
+      {showConnectedAnimation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 animate-fade-in">
+          <div className="animate-bounce-fade">
+            <Logo size="lg" className="opacity-90" />
+          </div>
+        </div>
       )}
 
     </div>
