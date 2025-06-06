@@ -333,32 +333,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`Checking matches for user ${userId}, partner ${partnerId}`);
     console.log(`Partner moods:`, partnerMoods);
     
-    // Check if partner has a matching mood that was created BEFORE this user's mood
+    // Check if partner has a matching mood
     const matchingMood = partnerMoods.find(mood => mood.moodType === moodType);
     
     if (matchingMood) {
       console.log(`Found matching mood: ${matchingMood.id}`);
       
-      // Check if both users already have active moods and a recent match exists
-      const existingMatches = await storage.getMatchesByCoupleId(couple.id);
-      const recentMatch = existingMatches.find(match => 
-        match.moodType === moodType && 
-        !match.connected &&
-        new Date(match.matchedAt).getTime() > Date.now() - 2 * 60 * 1000 // Within last 2 minutes
-      );
+      // Delete any existing unconnected matches for this couple to keep only one active match
+      await storage.deleteUnconnectedMatchesByCoupleId(couple.id);
+      console.log(`Cleaned up old unconnected matches for couple ${couple.id}`);
       
-      let match;
-      if (recentMatch) {
-        console.log(`Using existing match: ${recentMatch.id}`);
-        match = recentMatch;
-      } else {
-        // Create a new match
-        match = await storage.createMatch({
-          coupleId: couple.id,
-          moodType
-        });
-        console.log(`Created new match: ${match.id}`);
-      }
+      // Create a new match (only one active match per couple)
+      const match = await storage.createMatch({
+        coupleId: couple.id,
+        moodType
+      });
+      console.log(`Created new match: ${match.id}`);
       
       // Always notify both users about the match (new or existing)
       

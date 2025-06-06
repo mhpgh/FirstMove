@@ -40,6 +40,8 @@ export interface IStorage {
   createMatch(match: InsertMatch): Promise<Match>;
   acknowledgeMatch(matchId: number): Promise<void>;
   connectMatch(matchId: number): Promise<void>;
+  deleteMatch(matchId: number): Promise<void>;
+  deleteUnconnectedMatchesByCoupleId(coupleId: number): Promise<void>;
   
   // Partnership methods
   getPartner(userId: number): Promise<User | undefined>;
@@ -274,6 +276,18 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async deleteMatch(matchId: number): Promise<void> {
+    this.matches.delete(matchId);
+  }
+
+  async deleteUnconnectedMatchesByCoupleId(coupleId: number): Promise<void> {
+    for (const [id, match] of this.matches.entries()) {
+      if (match.coupleId === coupleId && !match.connected) {
+        this.matches.delete(id);
+      }
+    }
+  }
+
   // Partnership methods
   async getPartner(userId: number): Promise<User | undefined> {
     const couple = await this.getCoupleByUserId(userId);
@@ -466,6 +480,18 @@ export class DatabaseStorage implements IStorage {
         connectedAt: new Date()
       })
       .where(eq(matches.id, matchId));
+  }
+
+  async deleteMatch(matchId: number): Promise<void> {
+    await db
+      .delete(matches)
+      .where(eq(matches.id, matchId));
+  }
+
+  async deleteUnconnectedMatchesByCoupleId(coupleId: number): Promise<void> {
+    await db
+      .delete(matches)
+      .where(and(eq(matches.coupleId, coupleId), eq(matches.connected, false)));
   }
 
   async updateUserKeepTrack(userId: number, keepTrack: boolean): Promise<void> {
