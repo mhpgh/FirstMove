@@ -35,6 +35,8 @@ export const matches = pgTable("matches", {
   moodType: text("mood_type").notNull(),
   matchedAt: timestamp("matched_at").defaultNow().notNull(),
   acknowledged: boolean("acknowledged").default(false).notNull(),
+  connected: boolean("connected").default(false).notNull(),
+  connectedAt: timestamp("connected_at"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

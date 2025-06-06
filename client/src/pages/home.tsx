@@ -4,6 +4,7 @@ import { Bell, Home, BarChart3, Settings, Heart, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
 import { Logo } from "@/components/logo";
@@ -54,6 +55,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [showConnectionPanel, setShowConnectionPanel] = useState(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
+  const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -254,7 +256,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
                 disabled={isInMood || setInMoodMutation.isPending}
                 className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
               >
-                {setInMoodMutation.isPending ? "Sending..." : isInMood ? "Waiting for partner..." : "In the Mood"}
+                {isInMood ? "Waiting for partner..." : "In the Mood"}
               </Button>
             </CardContent>
           </Card>
@@ -263,20 +265,30 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
         {/* Nudge Me Panel */}
         <Card className="rounded-2xl shadow-sm mb-6">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Nudge Me</h3>
-            <p className="text-gray-500 text-sm mb-4">How many days without a connection before we remind you?</p>
-            
-            <div className="flex items-center space-x-3">
-              <input
-                type="number"
-                min="1"
-                max="30"
-                value={nudgeDays}
-                onChange={(e) => setNudgeDays(Number(e.target.value))}
-                className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center"
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Nudge Me</h3>
+              <Switch 
+                checked={nudgeEnabled} 
+                onCheckedChange={setNudgeEnabled}
               />
-              <span className="text-gray-600">days</span>
             </div>
+            
+            {nudgeEnabled && (
+              <>
+                <p className="text-gray-500 text-sm mb-4">How many days without a connection before we remind you?</p>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={nudgeDays}
+                    onChange={(e) => setNudgeDays(Number(e.target.value))}
+                    className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center"
+                  />
+                  <span className="text-gray-600">days</span>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

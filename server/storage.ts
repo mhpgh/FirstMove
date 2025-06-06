@@ -37,6 +37,7 @@ export interface IStorage {
   getMatchesByCoupleId(coupleId: number): Promise<Match[]>;
   createMatch(match: InsertMatch): Promise<Match>;
   acknowledgeMatch(matchId: number): Promise<void>;
+  connectMatch(matchId: number): Promise<void>;
   
   // Partnership methods
   getPartner(userId: number): Promise<User | undefined>;

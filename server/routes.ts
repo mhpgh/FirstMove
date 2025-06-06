@@ -195,6 +195,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/match/:id/connect", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.id);
+      await storage.connectMatch(matchId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
