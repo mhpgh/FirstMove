@@ -37,16 +37,21 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   });
 
   const onSubmit = async (data: AuthFormData) => {
+    console.log('Auth form submitted with data:', { username: data.username, hasPassword: !!data.password });
     setIsLoading(true);
     try {
       let user;
       if (isLogin) {
+        console.log('Attempting login...');
         user = await loginUser(data.username, data.password);
+        console.log('Login successful:', user);
       } else {
         if (!data.displayName) {
           throw new Error("Display name is required for registration");
         }
+        console.log('Attempting registration...');
         user = await registerUser(data.username, data.password, data.displayName);
+        console.log('Registration successful:', user);
       }
       
       setStoredAuth(user);
@@ -56,6 +61,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       });
       onAuthSuccess();
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
         description: error.message || "An error occurred",
