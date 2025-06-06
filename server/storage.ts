@@ -17,6 +17,7 @@ export interface IStorage {
   validateUser(username: string, password: string): Promise<User | null>;
   updateUserKeepTrack(userId: number, keepTrack: boolean): Promise<void>;
   clearUserHistory(userId: number): Promise<void>;
+  deleteUser(userId: number): Promise<void>;
   
   // Couple methods
   getCouple(id: number): Promise<Couple | undefined>;
@@ -286,6 +287,10 @@ export class DatabaseStorage implements IStorage {
     if (!partnerId) return undefined;
     
     return this.getUser(partnerId as number);
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, userId));
   }
 }
 

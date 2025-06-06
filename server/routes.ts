@@ -321,6 +321,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user account
+  app.delete("/api/user/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Get user's couple data before deletion
+      const couple = await storage.getCoupleByUserId(userId);
+      
+      if (couple) {
+        // Get partner ID for cleanup
+        const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+        
+        // Clear user's history and mood
+        await storage.clearUserHistory(userId);
+        await storage.deleteUserMood(userId);
+        
+        // If partner exists, clear their history too since shared data will be lost
+        if (partnerId) {
+          await storage.clearUserHistory(partnerId);
+          await storage.deleteUserMood(partnerId);
+        }
+        
+        // Delete all matches for this couple
+        const matches = await storage.getMatchesByCoupleId(couple.id);
+        for (const match of matches) {
+          await storage.deleteMatch(match.id);
+        }
+        
+        // Deactivate the couple
+        await storage.deactivateCouple(couple.id);
+      } else {
+        // If no couple, still clear user's individual data
+        await storage.clearUserHistory(userId);
+        await storage.deleteUserMood(userId);
+      }
+      
+      // Delete the user account
+      await storage.deleteUser(userId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server setup
