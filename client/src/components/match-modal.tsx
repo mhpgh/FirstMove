@@ -26,7 +26,7 @@ export function MatchModal({
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">It's time!</h3>
           <p className="text-gray-600 mb-6">
-            {partnerName} is ready to connect!
+            {partnerName} is ready to connect
           </p>
           <Button 
             onClick={onClose}
