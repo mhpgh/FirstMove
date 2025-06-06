@@ -18,6 +18,7 @@ interface Partner {
   id: number;
   username: string;
   displayName: string;
+  keepTrack: boolean;
   createdAt: string;
 }
 
@@ -60,6 +61,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
+  const [keepTrack, setKeepTrack] = useState<boolean>(true);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -77,6 +80,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     queryKey: [`/api/couple/${coupleData?.couple.id}/matches`],
     enabled: !!coupleData?.couple.id,
   });
+
+  // Initialize keepTrack state from user data
+  useEffect(() => {
+    if (user.keepTrack !== undefined) {
+      setKeepTrack(user.keepTrack);
+    }
+  }, [user.keepTrack]);
 
   // Set "in the mood" mutation
   const setInMoodMutation = useMutation({
@@ -107,6 +117,33 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     },
   });
 
+  // Update keep track preference mutation
+  const updateKeepTrackMutation = useMutation({
+    mutationFn: async (newKeepTrack: boolean) => {
+      const response = await apiRequest("PUT", `/api/user/${user.id}/keep-track`, {
+        keepTrack: newKeepTrack,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}/couple`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/couple/${coupleData?.couple.id}/matches`] });
+      toast({
+        title: "Settings updated",
+        description: keepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update tracking preference",
+        variant: "destructive",
+      });
+      // Reset the switch on error
+      setKeepTrack(!keepTrack);
+    },
+  });
+
   // Handle WebSocket messages
   useEffect(() => {
     if (lastMessage?.type === "match") {
@@ -115,7 +152,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
         coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
         moodType: lastMessage.moodType,
         matchedAt: lastMessage.matchedAt,
-        acknowledged: false
+        acknowledged: false,
+        connected: false,
+        connectedAt: null
       });
       setShowMatchModal(true);
       setShowConnectionPanel(true);
@@ -142,23 +181,34 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const handleConnectionConfirmed = async () => {
     if (currentMatch) {
       try {
-        await apiRequest("POST", `/api/match/${currentMatch.id}/connect`, {});
+        const response = await apiRequest("POST", `/api/match/${currentMatch.id}/connect`, {});
+        const result = await response.json();
+        
         setShowConnectionPanel(false);
         setIsInMood(false);
+        
         // Refresh matches data
         if (coupleData?.couple.id) {
           queryClient.invalidateQueries({
             queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
           });
         }
-        toast({
-          title: "Connection logged",
-          description: "Your intimate moment has been recorded",
-        });
+        
+        if (result.recorded) {
+          toast({
+            title: "Connection logged",
+            description: "Your intimate moment has been recorded",
+          });
+        } else {
+          toast({
+            title: "Connection confirmed",
+            description: "Both users need to enable 'Keep Track' to record history",
+          });
+        }
       } catch (error: any) {
         toast({
           title: "Error",
-          description: error.message || "Failed to log connection",
+          description: error.message || "Failed to confirm connection",
           variant: "destructive",
         });
       }
@@ -173,6 +223,28 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const handleLogout = () => {
     logoutUser();
     onLogout();
+  };
+
+  const handleKeepTrackToggle = (newValue: boolean) => {
+    if (!newValue && (matchesData?.matches.filter(match => match.connected) || []).length > 0) {
+      // Show confirmation dialog if turning off and history exists
+      setShowConfirmDialog(true);
+    } else {
+      // No history or turning on, proceed immediately
+      setKeepTrack(newValue);
+      updateKeepTrackMutation.mutate(newValue);
+    }
+  };
+
+  const handleConfirmDisableTracking = () => {
+    setShowConfirmDialog(false);
+    setKeepTrack(false);
+    updateKeepTrackMutation.mutate(false);
+  };
+
+  const handleCancelDisableTracking = () => {
+    setShowConfirmDialog(false);
+    // Keep the switch in the "on" position
   };
 
   if (isLoadingCouple) {
