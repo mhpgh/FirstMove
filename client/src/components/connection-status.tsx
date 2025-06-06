@@ -25,7 +25,7 @@ export function ConnectionStatus({ partner, isConnected }: ConnectionStatusProps
             {partner.displayName.charAt(0).toUpperCase()}
           </span>
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Take time to connect with {partner.displayName}</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Take time to be with {partner.displayName}</h2>
       </div>
     </div>
   );
