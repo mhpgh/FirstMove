@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Info, ArrowLeft } from "lucide-react";
+import { Heart, Info, Bell, Home, BarChart3, Settings } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Logo } from "@/components/logo";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@/lib/auth";
@@ -121,27 +122,32 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
 
   const connectedMatches = matchesData?.matches.filter(match => match.connected) || [];
 
+  const recentMatches = matchesData?.matches?.slice(0, 3) || [];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onBack}
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </Button>
-          <h1 className="text-xl font-semibold text-gray-800">Insights</h1>
-          <div></div>
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Logo size="sm" />
+            <span className="text-xl font-semibold text-gray-800">Hintly</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Bell className="text-gray-400 text-lg" />
+              {recentMatches.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center notification-badge">
+                  {recentMatches.length}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="p-4 max-w-md mx-auto space-y-6">
+      <main className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
         {/* Connection Statistics */}
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
@@ -225,6 +231,29 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
           </CardContent>
         </Card>
       </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100">
+        <div className="max-w-md mx-auto px-4 py-2">
+          <div className="flex items-center justify-around">
+            <button 
+              onClick={onBack}
+              className="flex flex-col items-center py-2 px-3 text-gray-400"
+            >
+              <Home className="text-lg mb-1" />
+              <span className="text-xs">Home</span>
+            </button>
+            <button className="flex flex-col items-center py-2 px-3 text-primary">
+              <BarChart3 className="text-lg mb-1" />
+              <span className="text-xs">Insights</span>
+            </button>
+            <button className="flex flex-col items-center py-2 px-3 text-gray-400">
+              <Settings className="text-lg mb-1" />
+              <span className="text-xs">Settings</span>
+            </button>
+          </div>
+        </div>
+      </nav>
 
       {/* Confirm Dialog for Disabling Keep Track */}
       <ConfirmDialog

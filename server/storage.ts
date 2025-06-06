@@ -192,6 +192,13 @@ export class MemStorage implements IStorage {
 
   async getActiveMoodsByUserId(userId: number): Promise<Mood[]> {
     const now = new Date();
+    // First, deactivate any expired moods
+    for (const mood of this.moods.values()) {
+      if (mood.userId === userId && mood.isActive && mood.expiresAt <= now) {
+        mood.isActive = false;
+      }
+    }
+    
     return Array.from(this.moods.values()).filter(
       (mood) => mood.userId === userId && mood.isActive && mood.expiresAt > now
     );
