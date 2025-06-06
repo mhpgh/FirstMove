@@ -240,13 +240,16 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       }
     } else if (lastMessage?.type === "connection") {
       console.log('Received connection WebSocket message:', lastMessage);
-      // Both users return to "In the Mood" state
+      // Immediately clear all connection-related state
       setShowConnectionPanel(false);
       setShowMatchModal(false);
       setCurrentMatch(null);
+      setIsInMood(false);
+      
+      // Show connection animation
       setShowConnectedAnimation(true);
       
-      // Hide animation after 2 seconds
+      // Hide animation after 2 seconds and ensure clean state
       setTimeout(() => {
         setShowConnectedAnimation(false);
       }, 2000);
