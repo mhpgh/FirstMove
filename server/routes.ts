@@ -223,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user1 = await storage.getUser(couple.user1Id);
-      const user2 = await storage.getUser(couple.user2Id);
+      const user2 = couple.user2Id ? await storage.getUser(couple.user2Id) : null;
       
       if (!user1 || !user2) {
         return res.status(404).json({ message: "Users not found" });
@@ -237,11 +237,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Delete moods for both users after connection
       await storage.deleteUserMood(couple.user1Id);
-      await storage.deleteUserMood(couple.user2Id);
+      if (couple.user2Id) {
+        await storage.deleteUserMood(couple.user2Id);
+      }
       
       // Notify both users via WebSocket that connection was made
       const user1Ws = userConnections.get(couple.user1Id);
-      const user2Ws = userConnections.get(couple.user2Id);
+      const user2Ws = couple.user2Id ? userConnections.get(couple.user2Id) : null;
       
       const connectionNotification = {
         type: 'connection',

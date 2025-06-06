@@ -14,7 +14,7 @@ export const users = pgTable("users", {
 export const couples = pgTable("couples", {
   id: serial("id").primaryKey(),
   user1Id: integer("user1_id").notNull(),
-  user2Id: integer("user2_id").notNull(),
+  user2Id: integer("user2_id"),
   pairingCode: text("pairing_code").unique(),
   isActive: boolean("is_active").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

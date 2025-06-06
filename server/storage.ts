@@ -139,10 +139,29 @@ export class DatabaseStorage implements IStorage {
   async generatePairingCode(userId: number): Promise<string> {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     
-    await db
-      .update(couples)
-      .set({ pairingCode: code })
-      .where(eq(couples.user1Id, userId));
+    // Check if user already has a couple record
+    const existingCouple = await db
+      .select()
+      .from(couples)
+      .where(eq(couples.user1Id, userId))
+      .limit(1);
+    
+    if (existingCouple.length > 0) {
+      // Update existing couple with new pairing code
+      await db
+        .update(couples)
+        .set({ pairingCode: code })
+        .where(eq(couples.user1Id, userId));
+    } else {
+      // Create new couple record
+      await db
+        .insert(couples)
+        .values({
+          user1Id: userId,
+          user2Id: null, // Will be set when someone joins
+          pairingCode: code,
+        });
+    }
     
     return code;
   }
