@@ -338,11 +338,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (matchingMood) {
       console.log(`Found matching mood: ${matchingMood.id}`);
       
-      // Check if there's a recent connected match (within last 5 minutes) - if so, don't create a new match
+      // Check if there's a recent connected match (within last 30 seconds) - if so, don't create a new match
       const existingMatches = await storage.getMatchesByCoupleId(couple.id);
       const recentConnectedMatch = existingMatches.find(match => 
         match.connected && 
-        new Date(match.connectedAt!).getTime() > Date.now() - 5 * 60 * 1000 // Within last 5 minutes
+        new Date(match.connectedAt!).getTime() > Date.now() - 30 * 1000 // Within last 30 seconds
       );
       
       if (recentConnectedMatch) {

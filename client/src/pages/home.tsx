@@ -262,7 +262,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         setIsInMood(false);
       }, 2000);
       
-      // Refresh data
+      // Refresh data immediately to sync with server state
       if (coupleData?.couple.id) {
         queryClient.invalidateQueries({
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
@@ -271,6 +271,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           queryKey: [`/api/user/${user.id}/moods`],
         });
       }
+      
+      // Force refresh mood data after a short delay to ensure server has processed deactivation
+      setTimeout(() => {
+        if (coupleData?.couple.id) {
+          queryClient.invalidateQueries({
+            queryKey: [`/api/user/${user.id}/moods`],
+          });
+        }
+      }, 500);
     }
   }, [lastMessage, coupleData, queryClient, user.id]);
 
