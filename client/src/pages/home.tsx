@@ -242,23 +242,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     }
   }, [activeMoodData]);
 
-  // Check for unconnected matches and restore connection panel state
+  // Check for unconnected matches only when we receive a WebSocket match notification
+  // Don't automatically show connection panel based on historical matches
   useEffect(() => {
-    if (matchesData?.matches) {
-      const unconnectedMatch = matchesData.matches.find(match => 
-        !match.connected && 
-        new Date(match.matchedAt).getTime() > Date.now() - 10 * 60 * 1000 // Within last 10 minutes
-      );
-      
-      if (unconnectedMatch && isInMood) {
-        setCurrentMatch(unconnectedMatch);
-        setShowConnectionPanel(true);
-      } else {
-        setShowConnectionPanel(false);
-        setCurrentMatch(null);
-      }
+    // Only reset connection panel if there are no active moods
+    if (!isInMood && showConnectionPanel) {
+      setShowConnectionPanel(false);
+      setCurrentMatch(null);
     }
-  }, [matchesData, isInMood]);
+  }, [isInMood, showConnectionPanel]);
 
   const handleInMoodPress = () => {
     setInMoodMutation.mutate();
