@@ -388,10 +388,27 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Recent Connections</h3>
-              <span className="text-xs text-gray-500">Last 7 days</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Keep Track</span>
+                <Switch 
+                  checked={keepTrack} 
+                  onCheckedChange={handleKeepTrackToggle}
+                  disabled={updateKeepTrackMutation.isPending}
+                />
+              </div>
             </div>
+
+            {/* Show tracking status message when partner tracking is off */}
+            {keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg mb-4">
+                <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <p className="text-sm text-blue-700">
+                  Your partner also needs to enable "Keep Track" to record connection history.
+                </p>
+              </div>
+            )}
             
-            {(matchesData?.matches.filter(match => match.connected) || []).length > 0 ? (
+            {keepTrack && (matchesData?.matches.filter(match => match.connected) || []).length > 0 ? (
               <div className="space-y-3">
                 {(matchesData?.matches.filter(match => match.connected) || []).map((match) => (
                   <div key={match.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
@@ -414,8 +431,17 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">No recent connections</p>
-                <p className="text-xs text-gray-400 mt-1">Press "In the Mood" when you're feeling intimate</p>
+                {keepTrack ? (
+                  <>
+                    <p className="text-gray-500">No recent connections</p>
+                    <p className="text-xs text-gray-400 mt-1">Press "In the Mood" when you're feeling intimate</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-500">Connection tracking is disabled</p>
+                    <p className="text-xs text-gray-400 mt-1">Enable "Keep Track" to record your intimate moments</p>
+                  </>
+                )}
               </div>
             )}
           </CardContent>
@@ -452,6 +478,18 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
           onStartConversation={handleMatchModalClose}
         />
       )}
+
+      {/* Confirm Dialog for Disabling Keep Track */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={handleCancelDisableTracking}
+        onConfirm={handleConfirmDisableTracking}
+        title="Disable Connection Tracking?"
+        description="This will permanently delete all your connection history. This action cannot be undone."
+        confirmText="Delete History"
+        cancelText="Keep Tracking"
+        variant="destructive"
+      />
     </div>
   );
 }
