@@ -151,16 +151,20 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center">
-          <Logo size="sm" />
-        </div>
-        <div className="max-w-md mx-auto px-4 pb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Insights</h1>
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Logo size="sm" />
+            <span className="text-xl font-semibold text-gray-800">Hintly</span>
+          </div>
+          <div></div> {/* Spacer for alignment */}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="pb-20 p-4 max-w-md mx-auto space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Insights</h1>
+        </div>
         
         {/* Statistics */}
         <div className="grid grid-cols-2 gap-4">

@@ -437,11 +437,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     <div className="min-h-screen">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center">
-          <Logo size="sm" />
-        </div>
-        <div className="max-w-md mx-auto px-4 pb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-800">Ready to connect?</h1>
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Logo size="sm" />
+            <span className="text-xl font-semibold text-gray-800">Hintly</span>
+          </div>
           <div className="flex items-center space-x-4">
             <div className="relative" data-notification-panel>
               <button 
@@ -520,6 +520,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
       {/* Main Content */}
       <main className="pt-20 pb-20 px-4 max-w-md mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Ready to connect?</h1>
+        </div>
         {/* Connection Status */}
         <ConnectionStatus 
           partner={coupleData.partner} 
