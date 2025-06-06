@@ -23,8 +23,6 @@ export const couples = pgTable("couples", {
 export const moods = pgTable("moods", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  moodType: text("mood_type").notNull(),
-  isActive: boolean("is_active").default(true).notNull(),
   duration: integer("duration").notNull().default(60), // duration in minutes
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -33,7 +31,6 @@ export const moods = pgTable("moods", {
 export const matches = pgTable("matches", {
   id: serial("id").primaryKey(),
   coupleId: integer("couple_id").notNull(),
-  moodType: text("mood_type").notNull(),
   matchedAt: timestamp("matched_at").defaultNow().notNull(),
   acknowledged: boolean("acknowledged").default(false).notNull(),
   connected: boolean("connected").default(false).notNull(),

@@ -29,10 +29,10 @@ export interface IStorage {
   
   // Mood methods
   getMood(id: number): Promise<Mood | undefined>;
-  getActiveMoodsByUserId(userId: number): Promise<Mood[]>;
+  getMoodByUserId(userId: number): Promise<Mood | undefined>;
   createMood(mood: InsertMood): Promise<Mood>;
-  deactivateMood(moodId: number): Promise<void>;
-  deactivateUserMoods(userId: number): Promise<void>;
+  deleteMood(moodId: number): Promise<void>;
+  deleteUserMood(userId: number): Promise<void>;
   
   // Match methods
   getMatch(id: number): Promise<Match | undefined>;
