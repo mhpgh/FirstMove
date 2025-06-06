@@ -61,6 +61,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
+  const [showConnectedAnimation, setShowConnectedAnimation] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -110,6 +111,40 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     },
   });
 
+  // Connect match mutation
+  const connectMatchMutation = useMutation({
+    mutationFn: async (matchId: number) => {
+      const response = await apiRequest("PUT", `/api/match/${matchId}/connect`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      // Show the connected animation
+      setShowConnectedAnimation(true);
+      
+      // Reset to original state after animation
+      setTimeout(() => {
+        setShowConnectedAnimation(false);
+        setShowConnectionPanel(false);
+        setCurrentMatch(null);
+        setIsInMood(false);
+      }, 2000);
+
+      // Refresh matches data
+      if (coupleData?.couple.id) {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to connect",
+        variant: "destructive",
+      });
+    },
+  });
+
 
 
   // Handle WebSocket messages
@@ -126,6 +161,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       });
       setShowMatchModal(true);
       setShowConnectionPanel(true);
+      // Remove the duplicate notification - only show match modal, not toast
       // Refresh matches data
       if (coupleData?.couple.id) {
         queryClient.invalidateQueries({
@@ -146,40 +182,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     setInMoodMutation.mutate();
   };
 
-  const handleConnectionConfirmed = async () => {
+  const handleConnectionConfirmed = () => {
     if (currentMatch) {
-      try {
-        const response = await apiRequest("POST", `/api/match/${currentMatch.id}/connect`, {});
-        const result = await response.json();
-        
-        setShowConnectionPanel(false);
-        setIsInMood(false);
-        
-        // Refresh matches data
-        if (coupleData?.couple.id) {
-          queryClient.invalidateQueries({
-            queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
-          });
-        }
-        
-        if (result.recorded) {
-          toast({
-            title: "Connection logged",
-            description: "Your intimate moment has been recorded",
-          });
-        } else {
-          toast({
-            title: "Connection confirmed",
-            description: "Both users need to enable 'Keep Track' to record history",
-          });
-        }
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to confirm connection",
-          variant: "destructive",
-        });
-      }
+      connectMatchMutation.mutate(currentMatch.id);
     }
   };
 
@@ -255,13 +260,16 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">It's Time!</h3>
-              <p className="text-gray-500 text-sm mb-6">You both indicated you're in the mood</p>
+              <p className="text-gray-500 text-sm mb-6">
+                You both indicated you're in the mood{currentMatch && ` until ${new Date(Date.now() + parseInt(selectedDuration) * 60 * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+              </p>
               
               <Button
                 onClick={handleConnectionConfirmed}
-                className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90"
+                disabled={connectMatchMutation.isPending}
+                className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
               >
-                We Connected
+                {connectMatchMutation.isPending ? "Connecting..." : "We Connected"}
               </Button>
             </CardContent>
           </Card>
