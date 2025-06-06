@@ -205,6 +205,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   // Handle WebSocket messages
   useEffect(() => {
     if (lastMessage?.type === "match") {
+      console.log('Received match WebSocket message:', lastMessage);
       setCurrentMatch({
         id: lastMessage.matchId,
         coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
@@ -225,6 +226,24 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       }
     }
   }, [lastMessage, coupleData, queryClient]);
+
+  // Check for new matches after setting mood (fallback if WebSocket fails)
+  useEffect(() => {
+    if (isInMood && matchesData?.matches && coupleData?.couple.id) {
+      const recentMatch = matchesData.matches.find(match => 
+        !match.connected && 
+        new Date(match.matchedAt).getTime() > Date.now() - 2 * 60 * 1000 && // Within last 2 minutes
+        !currentMatch // Only if we don't already have a current match
+      );
+      
+      if (recentMatch) {
+        console.log('Found recent match via polling:', recentMatch);
+        setCurrentMatch(recentMatch);
+        setShowMatchModal(true);
+        setShowConnectionPanel(true);
+      }
+    }
+  }, [matchesData, isInMood, currentMatch, coupleData]);
 
   // Check if user needs pairing
   useEffect(() => {
