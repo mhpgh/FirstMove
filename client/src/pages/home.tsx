@@ -242,7 +242,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   };
 
   const handleCancelMood = () => {
-    // Call the deactivate endpoint to cancel the mood
     cancelMoodMutation.mutate();
   };
 
