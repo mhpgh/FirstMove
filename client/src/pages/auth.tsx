@@ -37,9 +37,6 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
   });
 
   const onSubmit = async (data: AuthFormData) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form errors:", form.formState.errors);
-    
     // Manual validation for registration mode
     if (!isLogin && (!data.displayName || data.displayName.length < 2)) {
       form.setError("displayName", {
@@ -52,14 +49,11 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     try {
       let user;
       if (isLogin) {
-        console.log("Attempting login for user:", data.username);
         user = await loginUser(data.username, data.password);
       } else {
-        console.log("Attempting registration for user:", data.username);
         user = await registerUser(data.username, data.password, data.displayName!);
       }
       
-      console.log("Authentication successful:", user);
       setStoredAuth(user);
       toast({
         title: "Success",
@@ -67,7 +61,6 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
       });
       onAuthSuccess();
     } catch (error: any) {
-      console.error("Authentication error:", error);
       toast({
         title: "Error",
         description: error.message || "An error occurred",
@@ -143,12 +136,6 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 type="submit"
                 className="w-full gradient-bg text-white hover:opacity-90"
                 disabled={isLoading}
-                onClick={(e) => {
-                  console.log("Button clicked!");
-                  console.log("Form valid:", form.formState.isValid);
-                  console.log("Form values:", form.getValues());
-                  console.log("Form errors:", form.formState.errors);
-                }}
               >
                 {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
               </Button>

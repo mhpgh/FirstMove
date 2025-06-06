@@ -41,6 +41,7 @@ interface Match {
   acknowledged: boolean;
   connected: boolean;
   connectedAt: string | null;
+  recorded: boolean;
 }
 
 // Single mood option as per requirements
@@ -232,7 +233,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         matchedAt: lastMessage.matchedAt,
         acknowledged: false,
         connected: false,
-        connectedAt: null
+        connectedAt: null,
+        recorded: false
       });
       setShowMatchModal(true);
       setShowConnectionPanel(true);
