@@ -242,6 +242,24 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     }
   }, [activeMoodData]);
 
+  // Check for unconnected matches and restore connection panel state
+  useEffect(() => {
+    if (matchesData?.matches) {
+      const unconnectedMatch = matchesData.matches.find(match => 
+        !match.connected && 
+        new Date(match.matchedAt).getTime() > Date.now() - 10 * 60 * 1000 // Within last 10 minutes
+      );
+      
+      if (unconnectedMatch && isInMood) {
+        setCurrentMatch(unconnectedMatch);
+        setShowConnectionPanel(true);
+      } else {
+        setShowConnectionPanel(false);
+        setCurrentMatch(null);
+      }
+    }
+  }, [matchesData, isInMood]);
+
   const handleInMoodPress = () => {
     setInMoodMutation.mutate();
   };
@@ -251,8 +269,17 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   };
 
   const handleConnectionConfirmed = () => {
+    console.log('Connection button clicked, currentMatch:', currentMatch);
     if (currentMatch) {
+      console.log('Calling connectMatchMutation with ID:', currentMatch.id);
       connectMatchMutation.mutate(currentMatch.id);
+    } else {
+      console.log('No currentMatch available');
+      toast({
+        title: "Error",
+        description: "No match found to connect",
+        variant: "destructive",
+      });
     }
   };
 
