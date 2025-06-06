@@ -14,17 +14,39 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 30000, // Increased timeout
+  max: 10,
+  maxUses: Infinity,
+  allowExitOnIdle: false,
+  maxLifetimeSeconds: 0,
+  idleTimeoutMillis: 30000,
 });
+
 export const db = drizzle({ client: pool, schema });
 
-// Test database connection on startup
+// Test database connection on startup with retry logic
 export async function testConnection() {
-  try {
-    await pool.query('SELECT 1');
-    console.log('Database connection successful');
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    throw error;
+  const maxRetries = 3;
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      const client = await pool.connect();
+      await client.query('SELECT 1');
+      client.release();
+      console.log('Database connection successful');
+      return;
+    } catch (error) {
+      retries++;
+      console.error(`Database connection attempt ${retries} failed:`, error);
+      
+      if (retries >= maxRetries) {
+        console.error('Max database connection retries reached. Starting server without initial DB test.');
+        return; // Don't throw, just warn and continue
+      }
+      
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
   }
 }
