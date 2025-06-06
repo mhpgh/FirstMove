@@ -102,13 +102,18 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: () => {
-      // Set the mood state immediately for responsive UI
-      setIsInMood(true);
-      
       // Invalidate mood data to trigger refetch
       queryClient.invalidateQueries({
         queryKey: [`/api/user/${user.id}/moods`],
       });
+      
+      // Delay setting mood state to allow WebSocket match notification to arrive first
+      setTimeout(() => {
+        // Only set mood state if no match modal is showing (meaning no immediate match)
+        if (!showMatchModal) {
+          setIsInMood(true);
+        }
+      }, 100);
       
       // Don't show toast notification - let the UI state change speak for itself
     },

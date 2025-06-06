@@ -18,6 +18,10 @@ export function Logo({ size = "md", className = "" }: LogoProps) {
         src={logoImage} 
         alt="Hintly Logo" 
         className="w-full h-full object-contain"
+        style={{ 
+          mixBlendMode: 'multiply',
+          filter: 'brightness(0) invert(1)'
+        }}
       />
     </div>
   );
