@@ -40,7 +40,7 @@ interface SettingsPageProps {
   onShowInsights: () => void;
 }
 
-export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout }: SettingsPageProps) {
+export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, onShowInsights }: SettingsPageProps) {
   const [keepTrack, setKeepTrack] = useState<boolean>(true);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
@@ -133,18 +133,8 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout }:
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center space-x-2">
-            <Logo size="sm" />
-          </div>
-          <div className="w-16"></div> {/* Spacer for alignment */}
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center">
+          <Logo size="sm" />
         </div>
         <div className="max-w-md mx-auto px-4 pb-4">
           <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
@@ -299,6 +289,32 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout }:
           </CardContent>
         </Card>
       </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100">
+        <div className="max-w-md mx-auto px-4 py-2">
+          <div className="flex items-center justify-around">
+            <button 
+              onClick={onBack}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
+              <Home className="text-lg mb-1" />
+              <span className="text-xs">Home</span>
+            </button>
+            <button 
+              onClick={onShowInsights}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
+              <BarChart3 className="text-lg mb-1" />
+              <span className="text-xs">Insights</span>
+            </button>
+            <button className="flex flex-col items-center py-2 px-3 text-primary">
+              <Settings className="text-lg mb-1" />
+              <span className="text-xs">Settings</span>
+            </button>
+          </div>
+        </div>
+      </nav>
 
       {/* Disconnect Confirmation Dialog */}
       <ConfirmDialog

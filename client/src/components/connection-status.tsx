@@ -25,10 +25,7 @@ export function ConnectionStatus({ partner, isConnected }: ConnectionStatusProps
             {partner.displayName.charAt(0).toUpperCase()}
           </span>
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Building intimacy with {partner.displayName}</h2>
-        <p className="text-gray-600 leading-relaxed">
-          Every connection strengthens your bond. Take time to be present with each other and nurture the love you share.
-        </p>
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Take time to connect with {partner.displayName}</h2>
       </div>
     </div>
   );

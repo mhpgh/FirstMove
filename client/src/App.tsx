@@ -123,6 +123,7 @@ function App() {
               onBack={handleBackToHome}
               onNeedsPairing={handleNeedsPairing}
               onLogout={handleLogout}
+              onShowInsights={handleShowInsights}
             />
           )}
         </div>
