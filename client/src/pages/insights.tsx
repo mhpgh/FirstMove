@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Info, Bell, Home, BarChart3, Settings } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, ChevronLeft, ChevronRight, Calendar, Check, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Logo } from "@/components/logo";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import { User } from "@/lib/auth";
 
 interface Partner {
@@ -42,16 +38,22 @@ interface Match {
   recorded: boolean;
 }
 
+interface CalendarDay {
+  date: Date;
+  dateString: string;
+  hasConnection: boolean;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  dayNumber: number;
+}
+
 interface InsightsPageProps {
   user: User;
   onBack: () => void;
 }
 
 export default function InsightsPage({ user, onBack }: InsightsPageProps) {
-  const [keepTrack, setKeepTrack] = useState<boolean>(true);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // Fetch couple data
   const { data: coupleData } = useQuery<CoupleData>({
@@ -65,208 +67,245 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
     enabled: !!coupleData?.couple.id,
   });
 
-  // Initialize keepTrack state from user data
-  useEffect(() => {
-    if (user.keepTrack !== undefined) {
-      setKeepTrack(user.keepTrack);
+  // Calendar navigation functions
+  const goToPreviousMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  // Get connection dates from matches
+  const getConnectionDates = () => {
+    if (!matchesData?.matches) return new Set();
+    
+    return new Set(
+      matchesData.matches
+        .filter(match => match.connected && match.recorded && match.connectedAt)
+        .map(match => {
+          const date = new Date(match.connectedAt!);
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        })
+    );
+  };
+
+  // Generate calendar days
+  const generateCalendarDays = (): CalendarDay[] => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const days: CalendarDay[] = [];
+    const connectionDates = getConnectionDates();
+    
+    for (let i = 0; i < 42; i++) {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      
+      const dateString = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+      const hasConnection = connectionDates.has(dateString);
+      const isCurrentMonth = day.getMonth() === month;
+      const isToday = day.toDateString() === new Date().toDateString();
+      
+      days.push({
+        date: day,
+        dateString,
+        hasConnection,
+        isCurrentMonth,
+        isToday,
+        dayNumber: day.getDate()
+      });
     }
-  }, [user.keepTrack]);
-
-  // Update keep track preference mutation
-  const updateKeepTrackMutation = useMutation({
-    mutationFn: async (newKeepTrack: boolean) => {
-      const response = await apiRequest("PUT", `/api/user/${user.id}/keep-track`, {
-        keepTrack: newKeepTrack,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}/couple`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/couple/${coupleData?.couple.id}/matches`] });
-      toast({
-        title: "Settings updated",
-        description: keepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update tracking preference",
-        variant: "destructive",
-      });
-      // Reset the switch on error
-      setKeepTrack(!keepTrack);
-    },
-  });
-
-  const handleKeepTrackToggle = (newValue: boolean) => {
-    if (!newValue && (matchesData?.matches.filter(match => match.connected) || []).length > 0) {
-      // Show confirmation dialog if turning off and history exists
-      setShowConfirmDialog(true);
-    } else {
-      // No history or turning on, proceed immediately
-      setKeepTrack(newValue);
-      updateKeepTrackMutation.mutate(newValue);
-    }
+    
+    return days;
   };
 
-  const handleConfirmDisableTracking = () => {
-    setShowConfirmDialog(false);
-    setKeepTrack(false);
-    updateKeepTrackMutation.mutate(false);
+  // Get statistics
+  const getStats = () => {
+    if (!matchesData?.matches) return { totalConnections: 0, thisMonth: 0 };
+    
+    const connections = matchesData.matches.filter(match => match.connected && match.recorded && match.connectedAt);
+    const thisMonth = connections.filter(match => {
+      const connectionDate = new Date(match.connectedAt!);
+      return connectionDate.getMonth() === new Date().getMonth() && 
+             connectionDate.getFullYear() === new Date().getFullYear();
+    });
+
+    return {
+      totalConnections: connections.length,
+      thisMonth: thisMonth.length
+    };
   };
 
-  const handleCancelDisableTracking = () => {
-    setShowConfirmDialog(false);
-    // Keep the switch in the "on" position
-  };
-
-  const connectedMatches = matchesData?.matches.filter(match => match.connected && match.recorded) || [];
-
-  const recentMatches = matchesData?.matches?.slice(0, 3) || [];
+  const calendarDays = generateCalendarDays();
+  const stats = getStats();
+  const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </button>
           <div className="flex items-center space-x-2">
             <Logo size="sm" />
-            <span className="text-xl font-semibold text-gray-800">Hintly</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Bell className="text-gray-400 text-lg" />
-              {recentMatches.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center notification-badge">
-                  {recentMatches.length}
-                </span>
-              )}
-            </div>
-          </div>
+          <div className="w-16"></div> {/* Spacer for alignment */}
+        </div>
+        <div className="max-w-md mx-auto px-4 pb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Insights</h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="pt-20 pb-20 p-4 max-w-md mx-auto space-y-6">
-        {/* Connection Statistics */}
+      <main className="pb-20 p-4 max-w-md mx-auto space-y-6">
+        
+        {/* Statistics */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-4 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-300 to-purple-300 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Heart className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800">{stats.totalConnections}</div>
+              <div className="text-sm text-gray-500">Total Connections</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="rounded-2xl shadow-sm">
+            <CardContent className="p-4 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-300 to-emerald-300 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800">{stats.thisMonth}</div>
+              <div className="text-sm text-gray-500">This Month</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Calendar */}
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Connection Statistics</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{connectedMatches.length}</div>
-                <div className="text-sm text-gray-500">Total Connections</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">
-                  {connectedMatches.length > 0 ? Math.round(connectedMatches.length / 7) || 1 : 0}
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              <h3 className="text-lg font-semibold text-gray-800">
+                {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+              </h3>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToNextMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {dayNames.map(day => (
+                <div key={day} className="h-8 flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-500">{day}</span>
                 </div>
-                <div className="text-sm text-gray-500">Per Week</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Connections */}
-        <Card className="rounded-2xl shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Recent Connections</h3>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Keep Track</span>
-                <Switch 
-                  checked={keepTrack} 
-                  onCheckedChange={handleKeepTrackToggle}
-                  disabled={updateKeepTrackMutation.isPending}
-                />
-              </div>
+              ))}
             </div>
 
-            {/* Show tracking status message when partner tracking is off */}
-            {keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
-              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg mb-4">
-                <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <p className="text-sm text-blue-700">
-                  Your partner also needs to enable "Keep Track" to record connection history.
-                </p>
-              </div>
-            )}
-            
-            {keepTrack && connectedMatches.length > 0 ? (
-              <div className="space-y-3">
-                {connectedMatches.map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
-                        <Heart className="text-white text-xs" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">Intimate Connection</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(match.matchedAt).toLocaleDateString()} at {new Date(match.matchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {calendarDays.map((day, index) => (
+                <div
+                  key={index}
+                  className={`h-10 flex items-center justify-center relative ${
+                    !day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700'
+                  } ${
+                    day.isToday ? 'bg-blue-100 rounded-lg' : ''
+                  }`}
+                >
+                  <span className="text-sm">{day.dayNumber}</span>
+                  {day.hasConnection && day.isCurrentMonth && (
+                    <div className="absolute top-1 right-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full flex items-center justify-center">
+                        <Check className="w-1 h-1 text-white" />
                       </div>
                     </div>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      Connected
-                    </span>
-                  </div>
-                ))}
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Legend */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Connection recorded</span>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                {keepTrack ? (
-                  <>
-                    <p className="text-gray-500">No recent connections</p>
-                    <p className="text-xs text-gray-400 mt-1">Press "In the Mood" when you're feeling intimate</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-gray-500">Connection tracking is disabled</p>
-                    <p className="text-xs text-gray-400 mt-1">Enable "Keep Track" to record your intimate moments</p>
-                  </>
-                )}
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
+
+        {/* Information */}
+        {!user.keepTrack && (
+          <Card className="rounded-2xl shadow-sm border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Calendar className="w-3 h-3 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-blue-800 font-medium mb-1">
+                    Enable "Keep Track" to see your connection history
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Go to Settings to turn on connection tracking. Both you and your partner need to enable this feature to record connections.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {user.keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
+          <Card className="rounded-2xl shadow-sm border-amber-200 bg-amber-50">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Calendar className="w-3 h-3 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-amber-800 font-medium mb-1">
+                    Partner tracking disabled
+                  </p>
+                  <p className="text-xs text-amber-600">
+                    Your partner has not enabled "Keep Track" so connections won't be recorded until they turn it on in Settings.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100">
-        <div className="max-w-md mx-auto px-4 py-2">
-          <div className="flex items-center justify-around">
-            <button 
-              onClick={onBack}
-              className="flex flex-col items-center py-2 px-3 text-gray-400"
-            >
-              <Home className="text-lg mb-1" />
-              <span className="text-xs">Home</span>
-            </button>
-            <button className="flex flex-col items-center py-2 px-3 text-primary">
-              <BarChart3 className="text-lg mb-1" />
-              <span className="text-xs">Insights</span>
-            </button>
-            <button className="flex flex-col items-center py-2 px-3 text-gray-400">
-              <Settings className="text-lg mb-1" />
-              <span className="text-xs">Settings</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Confirm Dialog for Disabling Keep Track */}
-      <ConfirmDialog
-        isOpen={showConfirmDialog}
-        onClose={handleCancelDisableTracking}
-        onConfirm={handleConfirmDisableTracking}
-        title="Disable Connection Tracking?"
-        description="This will permanently delete all your connection history. This action cannot be undone."
-        confirmText="Delete History"
-        cancelText="Keep Tracking"
-        variant="destructive"
-      />
     </div>
   );
 }

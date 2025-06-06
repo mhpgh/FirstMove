@@ -514,14 +514,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                 </div>
               )}
             </div>
-            <button 
-              onClick={handleLogout}
-              className="w-8 h-8 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center"
-            >
-              <span className="text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 bg-gradient-to-br from-pink-300 to-purple-300 rounded-full overflow-hidden flex items-center justify-center">
+              <span className="text-sm font-medium text-white">
                 {user.displayName.charAt(0).toUpperCase()}
               </span>
-            </button>
+            </div>
           </div>
         </div>
       </header>
