@@ -63,7 +63,6 @@ interface Notification {
 }
 
 export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsights, onShowSettings }: HomePageProps) {
-  const [isInMood, setIsInMood] = useState<boolean>(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [showConnectionPanel, setShowConnectionPanel] = useState(false);
@@ -95,6 +94,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     enabled: !!user.id,
   });
 
+  // Derive mood state from server data
+  const isInMood = activeMoodData?.moods && activeMoodData.moods.length > 0;
+
 
 
   // Set "in the mood" mutation
@@ -110,8 +112,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: () => {
-      // Set mood state immediately - WebSocket will override if there's a match
-      setIsInMood(true);
+      // Mood state will be updated via query invalidation
       
       // Invalidate queries
       queryClient.invalidateQueries({
@@ -141,7 +142,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     },
     onSuccess: () => {
       // Clear all local state
-      setIsInMood(false);
       setShowConnectionPanel(false);
       setCurrentMatch(null);
       setShowMatchModal(false);
