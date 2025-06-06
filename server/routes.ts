@@ -281,7 +281,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (message.type === 'auth') {
           userId = message.userId;
-          userConnections.set(userId, ws);
+          if (userId !== null) {
+            userConnections.set(userId, ws);
+          }
           ws.send(JSON.stringify({ type: 'auth_success', userId }));
         }
       } catch (error) {

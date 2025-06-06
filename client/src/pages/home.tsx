@@ -233,9 +233,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     }
   }, [isLoadingCouple, coupleData, onNeedsPairing]);
 
-  // Reset mood state when moods are cleared from backend (after connection)
+  // Sync mood state with backend data
   useEffect(() => {
-    if (!activeMoodData?.moods || activeMoodData.moods.length === 0) {
+    if (activeMoodData?.moods && activeMoodData.moods.length > 0) {
+      setIsInMood(true);
+    } else {
       setIsInMood(false);
     }
   }, [activeMoodData]);
