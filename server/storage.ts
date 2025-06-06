@@ -6,7 +6,7 @@ import {
   type Match, type InsertMatch
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, lt, gt } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -388,10 +388,28 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveMoodsByUserId(userId: number): Promise<Mood[]> {
     const now = new Date();
+    
+    // First, deactivate expired moods in the database
+    await db
+      .update(moods)
+      .set({ isActive: false })
+      .where(
+        and(
+          eq(moods.userId, userId),
+          eq(moods.isActive, true),
+          lt(moods.expiresAt, now)
+        )
+      );
+    
+    // Then fetch active, non-expired moods
     const result = await db.select().from(moods).where(
-      eq(moods.userId, userId)
+      and(
+        eq(moods.userId, userId),
+        eq(moods.isActive, true),
+        gt(moods.expiresAt, now)
+      )
     );
-    return result.filter(mood => mood.isActive && mood.expiresAt > now);
+    return result;
   }
 
   async createMood(insertMood: InsertMood): Promise<Mood> {
