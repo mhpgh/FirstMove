@@ -102,6 +102,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response.json();
     },
     onSuccess: () => {
+      // Set the mood state immediately for responsive UI
+      setIsInMood(true);
+      
       // Invalidate mood data to trigger refetch
       queryClient.invalidateQueries({
         queryKey: [`/api/user/${user.id}/moods`],
