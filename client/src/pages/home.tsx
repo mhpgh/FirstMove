@@ -110,10 +110,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         queryKey: [`/api/user/${user.id}/moods`],
       });
       
-      toast({
-        title: "Got it!",
-        description: "We'll let you know when your partner feels the same way",
-      });
+      // Don't show toast notification - let the UI state change speak for itself
     },
     onError: (error: any) => {
       toast({
@@ -229,7 +226,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // Check for new matches after setting mood (fallback if WebSocket fails)
   useEffect(() => {
-    if (isInMood && matchesData?.matches && coupleData?.couple.id) {
+    if (isInMood && matchesData?.matches && coupleData?.couple.id && !showMatchModal) {
       const recentMatch = matchesData.matches.find(match => 
         !match.connected && 
         new Date(match.matchedAt).getTime() > Date.now() - 2 * 60 * 1000 && // Within last 2 minutes
@@ -243,7 +240,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         setShowConnectionPanel(true);
       }
     }
-  }, [matchesData, isInMood, currentMatch, coupleData]);
+  }, [matchesData, isInMood, currentMatch, coupleData, showMatchModal]);
 
   // Check if user needs pairing
   useEffect(() => {
@@ -300,7 +297,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   const handleMatchModalClose = () => {
     setShowMatchModal(false);
-    setCurrentMatch(null);
+    // Don't clear currentMatch - keep it for the connection panel
+    // setCurrentMatch(null);
   };
 
   const handleLogout = () => {
