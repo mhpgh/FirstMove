@@ -15,6 +15,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   validateUser(username: string, password: string): Promise<User | null>;
+  updateUserKeepTrack(userId: number, keepTrack: boolean): Promise<void>;
+  clearUserHistory(userId: number): Promise<void>;
   
   // Couple methods
   getCouple(id: number): Promise<Couple | undefined>;
