@@ -64,6 +64,10 @@ function App() {
     setAppState("insights");
   };
 
+  const handleShowSettings = () => {
+    setAppState("settings");
+  };
+
   const handleBackToHome = () => {
     setAppState("home");
   };
@@ -101,6 +105,7 @@ function App() {
               onNeedsPairing={handleNeedsPairing}
               onLogout={handleLogout}
               onShowInsights={handleShowInsights}
+              onShowSettings={handleShowSettings}
             />
           )}
 
@@ -108,6 +113,14 @@ function App() {
             <InsightsPage 
               user={user}
               onBack={handleBackToHome}
+            />
+          )}
+
+          {appState === "settings" && user && (
+            <SettingsPage 
+              user={user}
+              onBack={handleBackToHome}
+              onNeedsPairing={handleNeedsPairing}
             />
           )}
         </div>

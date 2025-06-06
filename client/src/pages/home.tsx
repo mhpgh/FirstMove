@@ -51,6 +51,7 @@ interface HomePageProps {
   onNeedsPairing: () => void;
   onLogout: () => void;
   onShowInsights: () => void;
+  onShowSettings: () => void;
 }
 
 interface Notification {
@@ -61,13 +62,11 @@ interface Notification {
   read: boolean;
 }
 
-export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsights }: HomePageProps) {
+export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsights, onShowSettings }: HomePageProps) {
   const [isInMood, setIsInMood] = useState<boolean>(false);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [showConnectionPanel, setShowConnectionPanel] = useState(false);
-  const [nudgeDays, setNudgeDays] = useState<number>(7);
-  const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [selectedDuration, setSelectedDuration] = useState<string>("60");
   const [showConnectedAnimation, setShowConnectedAnimation] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -636,35 +635,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           </Card>
         )}
 
-        {/* Nudge Me Panel */}
-        <Card className="rounded-2xl shadow-sm mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Nudge Me</h3>
-              <Switch 
-                checked={nudgeEnabled} 
-                onCheckedChange={setNudgeEnabled}
-              />
-            </div>
-            
-            {nudgeEnabled && (
-              <>
-                <p className="text-gray-500 text-sm mb-4">How many days without a connection before we remind you?</p>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={nudgeDays}
-                    onChange={(e) => setNudgeDays(Number(e.target.value))}
-                    className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center"
-                  />
-                  <span className="text-gray-600">days</span>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+
 
 
       </main>
@@ -684,7 +655,10 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
               <BarChart3 className="text-lg mb-1" />
               <span className="text-xs">Insights</span>
             </button>
-            <button className="flex flex-col items-center py-2 px-3 text-gray-400">
+            <button 
+              onClick={onShowSettings}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
               <Settings className="text-lg mb-1" />
               <span className="text-xs">Settings</span>
             </button>
