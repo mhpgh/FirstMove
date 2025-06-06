@@ -132,10 +132,22 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       return response;
     },
     onSuccess: () => {
+      // Clear all local state
+      setIsInMood(false);
+      setShowConnectionPanel(false);
+      setCurrentMatch(null);
+      setShowMatchModal(false);
+      
       queryClient.invalidateQueries({
         queryKey: [`/api/user/${user.id}/moods`],
       });
-      setIsInMood(false);
+      
+      if (coupleData?.couple.id) {
+        queryClient.invalidateQueries({
+          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+        });
+      }
+      
       toast({
         title: "Cancelled",
         description: "Your mood has been cancelled",

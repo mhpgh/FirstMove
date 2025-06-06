@@ -334,44 +334,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (matchingMood) {
       console.log(`Found matching mood: ${matchingMood.id}`);
       
-      // Check if a match already exists for this couple and mood type
+      // Check if both users already have active moods and a recent match exists
       const existingMatches = await storage.getMatchesByCoupleId(couple.id);
       const recentMatch = existingMatches.find(match => 
         match.moodType === moodType && 
         !match.connected &&
-        new Date(match.matchedAt).getTime() > Date.now() - 5 * 60 * 1000 // Within last 5 minutes
+        new Date(match.matchedAt).getTime() > Date.now() - 2 * 60 * 1000 // Within last 2 minutes
       );
       
+      let match;
       if (recentMatch) {
-        console.log(`Match already exists: ${recentMatch.id}, notifying both users`);
-        // Still notify both users about the existing match
-        const userWs = userConnections.get(userId);
-        const partnerWs = userConnections.get(partnerId);
-        
-        const matchNotification = {
-          type: 'match',
-          matchId: recentMatch.id,
-          moodType,
-          matchedAt: recentMatch.matchedAt
-        };
-        
-        if (userWs && userWs.readyState === WebSocket.OPEN) {
-          userWs.send(JSON.stringify(matchNotification));
-        }
-        
-        if (partnerWs && partnerWs.readyState === WebSocket.OPEN) {
-          partnerWs.send(JSON.stringify(matchNotification));
-        }
-        return;
+        console.log(`Using existing match: ${recentMatch.id}`);
+        match = recentMatch;
+      } else {
+        // Create a new match
+        match = await storage.createMatch({
+          coupleId: couple.id,
+          moodType
+        });
+        console.log(`Created new match: ${match.id}`);
       }
       
-      // Create a match
-      const match = await storage.createMatch({
-        coupleId: couple.id,
-        moodType
-      });
-      
-      console.log(`Created new match: ${match.id}`);
+      // Always notify both users about the match (new or existing)
       
       // Notify both users via WebSocket
       const userWs = userConnections.get(userId);
