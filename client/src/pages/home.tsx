@@ -127,8 +127,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   // Cancel mood mutation
   const cancelMoodMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/user/${user.id}/moods/deactivate`, {});
-      return response.json();
+      const response = await apiRequest("POST", `/api/user/${user.id}/moods/deactivate`);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -268,6 +268,10 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     cancelMoodMutation.mutate();
   };
 
+  const handleResetMood = () => {
+    setInMoodMutation.mutate();
+  };
+
   const handleConnectionConfirmed = () => {
     console.log('Connection button clicked, currentMatch:', currentMatch);
     if (currentMatch) {
@@ -356,7 +360,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">It's Time!</h3>
               <p className="text-gray-500 text-sm mb-6">
-                You both indicated you're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                You both indicated you're in the mood{currentMatch && activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(Math.min(new Date(activeMoodData.moods[0].expiresAt).getTime(), new Date(currentMatch.matchedAt).getTime() + 60 * 60 * 1000)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
               </p>
               
               <Button
@@ -372,26 +376,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           <Card className="rounded-2xl shadow-sm mb-6 animate-slide-up">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
-              <p className="text-gray-500 text-sm mb-6">We'll let you know if your partner feels the same way</p>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Clock className="w-4 h-4 inline mr-2" />
-                  How long will you be in the mood?
-                </label>
-                <Select value={selectedDuration} onValueChange={setSelectedDuration}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="60">1 hour</SelectItem>
-                    <SelectItem value="120">2 hours</SelectItem>
-                    <SelectItem value="180">3 hours</SelectItem>
-                    <SelectItem value="360">6 hours</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               
               {isInMood ? (
                 <div className="space-y-4">
@@ -401,22 +385,71 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                     </p>
                     <p className="text-xs text-blue-600">Waiting for your partner to feel the same way...</p>
                   </div>
-                  <Button
-                    onClick={handleCancelMood}
-                    variant="outline"
-                    className="w-full py-3 rounded-xl font-medium"
-                  >
-                    Cancel
-                  </Button>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Clock className="w-4 h-4 inline mr-2" />
+                      How long will you be in the mood?
+                    </label>
+                    <Select value={selectedDuration} onValueChange={setSelectedDuration}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="60">1 hour</SelectItem>
+                        <SelectItem value="120">2 hours</SelectItem>
+                        <SelectItem value="180">3 hours</SelectItem>
+                        <SelectItem value="360">6 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleResetMood}
+                      disabled={setInMoodMutation.isPending}
+                      className="flex-1 gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
+                    >
+                      {setInMoodMutation.isPending ? "Resetting..." : "Reset"}
+                    </Button>
+                    <Button
+                      onClick={handleCancelMood}
+                      variant="outline"
+                      className="flex-1 py-3 rounded-xl font-medium"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <Button
-                  onClick={handleInMoodPress}
-                  disabled={setInMoodMutation.isPending}
-                  className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
-                >
-                  {setInMoodMutation.isPending ? "Setting mood..." : "In the Mood"}
-                </Button>
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Clock className="w-4 h-4 inline mr-2" />
+                      How long will you be in the mood?
+                    </label>
+                    <Select value={selectedDuration} onValueChange={setSelectedDuration}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="60">1 hour</SelectItem>
+                        <SelectItem value="120">2 hours</SelectItem>
+                        <SelectItem value="180">3 hours</SelectItem>
+                        <SelectItem value="360">6 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={handleInMoodPress}
+                    disabled={setInMoodMutation.isPending}
+                    className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {setInMoodMutation.isPending ? "Setting mood..." : "In the Mood"}
+                  </Button>
+                </>
               )}
             </CardContent>
           </Card>
