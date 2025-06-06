@@ -136,14 +136,30 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
     setInMoodMutation.mutate();
   };
 
-  const handleConnectionConfirmed = () => {
-    setShowConnectionPanel(false);
-    setIsInMood(false);
-    // Log the actual connection
-    toast({
-      title: "Connection logged",
-      description: "Your intimate moment has been recorded",
-    });
+  const handleConnectionConfirmed = async () => {
+    if (currentMatch) {
+      try {
+        await apiRequest("POST", `/api/match/${currentMatch.id}/connect`, {});
+        setShowConnectionPanel(false);
+        setIsInMood(false);
+        // Refresh matches data
+        if (coupleData?.couple.id) {
+          queryClient.invalidateQueries({
+            queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          });
+        }
+        toast({
+          title: "Connection logged",
+          description: "Your intimate moment has been recorded",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to log connection",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleMatchModalClose = () => {
@@ -300,9 +316,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
               <span className="text-xs text-gray-500">Last 7 days</span>
             </div>
             
-            {recentMatches.length > 0 ? (
+            {(matchesData?.matches.filter(match => match.connected) || []).length > 0 ? (
               <div className="space-y-3">
-                {recentMatches.map((match) => (
+                {(matchesData?.matches.filter(match => match.connected) || []).map((match) => (
                   <div key={match.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">

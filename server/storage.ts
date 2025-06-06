@@ -221,7 +221,9 @@ export class MemStorage implements IStorage {
       ...insertMatch, 
       id,
       matchedAt: new Date(),
-      acknowledged: false
+      acknowledged: false,
+      connected: false,
+      connectedAt: null
     };
     this.matches.set(id, match);
     return match;
@@ -231,6 +233,14 @@ export class MemStorage implements IStorage {
     const match = this.matches.get(matchId);
     if (match) {
       match.acknowledged = true;
+    }
+  }
+
+  async connectMatch(matchId: number): Promise<void> {
+    const match = this.matches.get(matchId);
+    if (match) {
+      match.connected = true;
+      match.connectedAt = new Date();
     }
   }
 
@@ -397,6 +407,16 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(matches)
       .set({ acknowledged: true })
+      .where(eq(matches.id, matchId));
+  }
+
+  async connectMatch(matchId: number): Promise<void> {
+    await db
+      .update(matches)
+      .set({ 
+        connected: true,
+        connectedAt: new Date()
+      })
       .where(eq(matches.id, matchId));
   }
 
