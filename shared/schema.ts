@@ -51,14 +51,12 @@ export const insertCoupleSchema = createInsertSchema(couples).pick({
 
 export const insertMoodSchema = createInsertSchema(moods).pick({
   userId: true,
-  moodType: true,
   duration: true,
   expiresAt: true,
 });
 
 export const insertMatchSchema = createInsertSchema(matches).pick({
   coupleId: true,
-  moodType: true,
 });
 
 export const loginSchema = z.object({

@@ -317,21 +317,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper function to check for matches
-  async function checkForMatches(userId: number, moodType: string) {
+  async function checkForMatches(userId: number) {
     const couple = await storage.getCoupleByUserId(userId);
     if (!couple || !couple.isActive) return;
 
     const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
-    const partnerMoods = await storage.getActiveMoodsByUserId(partnerId);
+    const partnerMood = await storage.getMoodByUserId(partnerId);
     
     console.log(`Checking matches for user ${userId}, partner ${partnerId}`);
-    console.log(`Partner moods:`, partnerMoods);
+    console.log(`Partner mood:`, partnerMood);
     
-    // Check if partner has a matching mood
-    const matchingMood = partnerMoods.find(mood => mood.moodType === moodType);
-    
-    if (matchingMood) {
-      console.log(`Found matching mood: ${matchingMood.id}`);
+    // Check if partner has an active mood
+    if (partnerMood) {
+      console.log(`Found partner mood: ${partnerMood.id}`);
       
       // Check if there's already an active unconnected match for this couple
       const existingMatches = await storage.getMatchesByCoupleId(couple.id);
@@ -348,12 +346,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create a new match (only one active match per couple)
       const match = await storage.createMatch({
-        coupleId: couple.id,
-        moodType
+        coupleId: couple.id
       });
       console.log(`Created new match: ${match.id}`);
-      
-      // Always notify both users about the match (new or existing)
       
       // Notify both users via WebSocket
       const userWs = userConnections.get(userId);
@@ -362,7 +357,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const matchNotification = {
         type: 'match',
         matchId: match.id,
-        moodType,
         matchedAt: match.matchedAt
       };
       
@@ -374,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         partnerWs.send(JSON.stringify(matchNotification));
       }
     } else {
-      console.log(`No matching mood found for ${moodType}`);
+      console.log(`No partner mood found`);
     }
   }
 

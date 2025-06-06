@@ -37,7 +37,6 @@ interface CoupleData {
 interface Match {
   id: number;
   coupleId: number;
-  moodType: string;
   matchedAt: string;
   acknowledged: boolean;
   connected: boolean;
@@ -95,7 +94,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       const expiresAt = new Date(Date.now() + duration * 60 * 1000).toISOString();
       const response = await apiRequest("POST", "/api/mood", {
         userId: user.id,
-        moodType: "intimate",
         duration: duration,
         expiresAt: expiresAt,
       });
@@ -231,7 +229,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       setCurrentMatch({
         id: lastMessage.matchId,
         coupleId: lastMessage.coupleId || coupleData?.couple.id || 0,
-        moodType: lastMessage.moodType,
         matchedAt: lastMessage.matchedAt,
         acknowledged: false,
         connected: false,
@@ -582,7 +579,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
           isOpen={showMatchModal}
           onClose={handleMatchModalClose}
           partnerName={coupleData.partner.displayName}
-          moodType={currentMatch.moodType}
+          moodType="intimate"
           onStartConversation={handleMatchModalClose}
         />
       )}
