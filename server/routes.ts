@@ -324,7 +324,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       if (recentMatch) {
-        console.log(`Match already exists: ${recentMatch.id}`);
+        console.log(`Match already exists: ${recentMatch.id}, notifying both users`);
+        // Still notify both users about the existing match
+        const userWs = userConnections.get(userId);
+        const partnerWs = userConnections.get(partnerId);
+        
+        const matchNotification = {
+          type: 'match',
+          matchId: recentMatch.id,
+          moodType,
+          matchedAt: recentMatch.matchedAt
+        };
+        
+        if (userWs && userWs.readyState === WebSocket.OPEN) {
+          userWs.send(JSON.stringify(matchNotification));
+        }
+        
+        if (partnerWs && partnerWs.readyState === WebSocket.OPEN) {
+          partnerWs.send(JSON.stringify(matchNotification));
+        }
         return;
       }
       
