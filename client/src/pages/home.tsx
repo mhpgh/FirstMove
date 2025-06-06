@@ -444,7 +444,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
             <span className="text-xl font-semibold text-gray-800">Hintly</span>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative" data-notification-panel>
               <button 
                 onClick={() => {
                   setShowNotifications(!showNotifications);
