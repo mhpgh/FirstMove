@@ -501,7 +501,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
                                 {notification.timestamp.toLocaleTimeString([], {
-                                  hour: '2-digit',
+                                  hour: 'numeric',
                                   minute: '2-digit'
                                 })}
                               </p>
@@ -534,7 +534,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">It's Time!</h3>
               <p className="text-gray-500 text-sm mb-6">
-                You both indicated you're in the mood{currentMatch && activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(Math.min(new Date(activeMoodData.moods[0].expiresAt).getTime(), new Date(currentMatch.matchedAt).getTime() + 60 * 60 * 1000)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                You're both in the mood to connect{currentMatch && activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(Math.min(new Date(activeMoodData.moods[0].expiresAt).getTime(), new Date(currentMatch.matchedAt).getTime() + 60 * 60 * 1000)).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`}
               </p>
               
               <Button
@@ -555,7 +555,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                 <div className="space-y-4">
                   <div className="text-center p-4 bg-blue-50 rounded-xl">
                     <p className="text-sm text-blue-700 mb-2">
-                      You're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                      You're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}`}
                     </p>
                     <p className="text-xs text-blue-600">Waiting for your partner to feel the same way...</p>
                   </div>
