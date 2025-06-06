@@ -1,9 +1,10 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import WebSocket from 'ws';
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// Configure Neon to use WebSocket for database connections
+neonConfig.webSocketConstructor = WebSocket;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -11,5 +12,19 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 10000,
+});
 export const db = drizzle({ client: pool, schema });
+
+// Test database connection on startup
+export async function testConnection() {
+  try {
+    await pool.query('SELECT 1');
+    console.log('Database connection successful');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    throw error;
+  }
+}
