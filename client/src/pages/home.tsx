@@ -423,7 +423,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                   </div>
                 </div>
               ) : (
-                <>
+                <div className="space-y-4">
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Clock className="w-4 h-4 inline mr-2" />
@@ -449,7 +449,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                   >
                     {setInMoodMutation.isPending ? "Setting mood..." : "In the Mood"}
                   </Button>
-                </>
+                </div>
               )}
             </CardContent>
           </Card>
