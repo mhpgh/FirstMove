@@ -7,8 +7,9 @@ import { getStoredAuth, setStoredAuth, type User } from "@/lib/auth";
 import AuthPage from "@/pages/auth";
 import PairingPage from "@/pages/pairing";
 import HomePage from "@/pages/home";
+import InsightsPage from "@/pages/insights";
 
-type AppState = "loading" | "auth" | "pairing" | "home";
+type AppState = "loading" | "auth" | "pairing" | "home" | "insights";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("loading");
@@ -56,6 +57,14 @@ function App() {
     setUser(null);
     setStoredAuth(null);
     setAppState("auth");
+  };
+
+  const handleShowInsights = () => {
+    setAppState("insights");
+  };
+
+  const handleBackToHome = () => {
+    setAppState("home");
   };
 
   if (appState === "loading") {
