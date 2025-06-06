@@ -231,12 +231,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(matches.id, matchId));
   }
 
-  async connectMatch(matchId: number): Promise<void> {
+  async connectMatch(matchId: number, recorded: boolean = false): Promise<void> {
     await db
       .update(matches)
       .set({ 
         connected: true,
-        connectedAt: new Date()
+        connectedAt: new Date(),
+        recorded: recorded
       })
       .where(eq(matches.id, matchId));
   }

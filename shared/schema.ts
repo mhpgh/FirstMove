@@ -35,6 +35,7 @@ export const matches = pgTable("matches", {
   acknowledged: boolean("acknowledged").default(false).notNull(),
   connected: boolean("connected").default(false).notNull(),
   connectedAt: timestamp("connected_at"),
+  recorded: boolean("recorded").default(false).notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

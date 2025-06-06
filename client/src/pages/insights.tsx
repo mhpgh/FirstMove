@@ -39,6 +39,7 @@ interface Match {
   acknowledged: boolean;
   connected: boolean;
   connectedAt: string | null;
+  recorded: boolean;
 }
 
 interface InsightsPageProps {
@@ -120,7 +121,7 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
     // Keep the switch in the "on" position
   };
 
-  const connectedMatches = matchesData?.matches.filter(match => match.connected) || [];
+  const connectedMatches = matchesData?.matches.filter(match => match.connected && match.recorded) || [];
 
   const recentMatches = matchesData?.matches?.slice(0, 3) || [];
 

@@ -229,11 +229,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Users not found" });
       }
       
-      // Always mark the match as connected to prevent duplicate matches
-      await storage.connectMatch(matchId);
-      
       // Only record in history if both users have tracking enabled
       const shouldRecord = user1.keepTrack && user2.keepTrack;
+      
+      // Mark the match as connected and set recording status
+      await storage.connectMatch(matchId, shouldRecord);
       
       // Delete moods for both users after connection
       await storage.deleteUserMood(couple.user1Id);
