@@ -24,9 +24,9 @@ export function MatchModal({
           <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
             <Heart className="text-white text-xl" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">It's a Match!</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">It's time!</h3>
           <p className="text-gray-600 mb-6">
-            You and {partnerName} are both feeling {moodType} right now
+            {partnerName} is ready to connect!
           </p>
           <Button 
             onClick={onClose}
