@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 const authSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
-  displayName: z.string().min(2, "Display name must be at least 2 characters").optional(),
+  displayName: z.string().optional(),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -40,6 +40,14 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     console.log("Form submitted with data:", data);
     console.log("Form errors:", form.formState.errors);
     
+    // Manual validation for registration mode
+    if (!isLogin && (!data.displayName || data.displayName.length < 2)) {
+      form.setError("displayName", {
+        message: "Display name must be at least 2 characters"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       let user;
@@ -47,11 +55,8 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
         console.log("Attempting login for user:", data.username);
         user = await loginUser(data.username, data.password);
       } else {
-        if (!data.displayName) {
-          throw new Error("Display name is required for registration");
-        }
         console.log("Attempting registration for user:", data.username);
-        user = await registerUser(data.username, data.password, data.displayName);
+        user = await registerUser(data.username, data.password, data.displayName!);
       }
       
       console.log("Authentication successful:", user);
