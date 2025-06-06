@@ -440,7 +440,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Logo size="sm" />
-            <span className="text-xl font-semibold text-gray-800">Hintly</span>
+            <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative" data-notification-panel>

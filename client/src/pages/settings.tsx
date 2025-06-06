@@ -170,7 +170,7 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Logo size="sm" />
-            <span className="text-xl font-semibold text-gray-800">Hintly</span>
+            <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
           <div className="flex items-center space-x-4">
             <button className="relative p-1 hover:bg-gray-100 rounded-full transition-colors">
