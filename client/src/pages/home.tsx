@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Home, BarChart3, Settings, Heart } from "lucide-react";
+import { Bell, Home, BarChart3, Settings, Heart, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
 import { Logo } from "@/components/logo";
@@ -53,6 +54,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [showConnectionPanel, setShowConnectionPanel] = useState(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
+  const [selectedDuration, setSelectedDuration] = useState<string>("60");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,9 +76,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
   // Set "in the mood" mutation
   const setInMoodMutation = useMutation({
     mutationFn: async () => {
+      const duration = parseInt(selectedDuration);
+      const expiresAt = new Date(Date.now() + duration * 60 * 1000).toISOString();
       const response = await apiRequest("POST", "/api/mood", {
         userId: user.id,
         moodType: "intimate",
+        duration: duration,
+        expiresAt: expiresAt,
       });
       return response.json();
     },
@@ -223,6 +229,25 @@ export default function HomePage({ user, onNeedsPairing, onLogout }: HomePagePro
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">How are you feeling?</h3>
               <p className="text-gray-500 text-sm mb-6">We'll let you know if your partner feels the same way</p>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Clock className="w-4 h-4 inline mr-2" />
+                  How long are you in the mood?
+                </label>
+                <Select value={selectedDuration} onValueChange={setSelectedDuration}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                    <SelectItem value="180">3 hours</SelectItem>
+                    <SelectItem value="360">6 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               
               <Button
                 onClick={handleInMoodPress}

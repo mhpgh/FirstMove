@@ -176,10 +176,12 @@ export class MemStorage implements IStorage {
   async createMood(insertMood: InsertMood): Promise<Mood> {
     const id = this.moodIdCounter++;
     const mood: Mood = { 
-      ...insertMood, 
       id,
-      isActive: true,
+      userId: insertMood.userId,
+      moodType: insertMood.moodType,
       duration: insertMood.duration || 60,
+      expiresAt: insertMood.expiresAt,
+      isActive: true,
       createdAt: new Date()
     };
     this.moods.set(id, mood);
