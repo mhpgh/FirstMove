@@ -121,6 +121,31 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     },
   });
 
+  // Cancel mood mutation
+  const cancelMoodMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/user/${user.id}/moods/deactivate`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/user/${user.id}/moods`],
+      });
+      setIsInMood(false);
+      toast({
+        title: "Cancelled",
+        description: "Your mood has been cancelled",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel mood",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Connect match mutation
   const connectMatchMutation = useMutation({
     mutationFn: async (matchId: number) => {
@@ -214,6 +239,11 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   const handleInMoodPress = () => {
     setInMoodMutation.mutate();
+  };
+
+  const handleCancelMood = () => {
+    // Call the deactivate endpoint to cancel the mood
+    cancelMoodMutation.mutate();
   };
 
   const handleConnectionConfirmed = () => {
@@ -332,13 +362,31 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                 </Select>
               </div>
               
-              <Button
-                onClick={handleInMoodPress}
-                disabled={isInMood || setInMoodMutation.isPending}
-                className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
-              >
-                {isInMood ? "Waiting for partner..." : "In the Mood"}
-              </Button>
+              {isInMood ? (
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-xl">
+                    <p className="text-sm text-blue-700 mb-2">
+                      You're in the mood{activeMoodData?.moods?.[0]?.expiresAt && ` until ${new Date(activeMoodData.moods[0].expiresAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
+                    </p>
+                    <p className="text-xs text-blue-600">Waiting for your partner to feel the same way...</p>
+                  </div>
+                  <Button
+                    onClick={handleCancelMood}
+                    variant="outline"
+                    className="w-full py-3 rounded-xl font-medium"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleInMoodPress}
+                  disabled={setInMoodMutation.isPending}
+                  className="w-full gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 disabled:opacity-50"
+                >
+                  {setInMoodMutation.isPending ? "Setting mood..." : "In the Mood"}
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
