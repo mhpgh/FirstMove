@@ -6,7 +6,7 @@ import {
   type Match, type InsertMatch
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, lt, gt } from "drizzle-orm";
+import { eq, and, or, lt, gt } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -90,7 +90,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(couples.isActive, true),
-          and(eq(couples.user1Id, userId), eq(couples.user2Id, userId))
+          or(eq(couples.user1Id, userId), eq(couples.user2Id, userId))
         )
       )
       .limit(1);
