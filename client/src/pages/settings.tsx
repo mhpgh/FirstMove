@@ -45,6 +45,7 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -108,6 +109,30 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
     },
   });
 
+  // Delete account mutation
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/user/${user.id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account deleted",
+        description: "Your account and all data have been permanently deleted",
+      });
+      if (onLogout) {
+        onLogout();
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleKeepTrackToggle = (newValue: boolean) => {
     setKeepTrack(newValue);
     updateKeepTrackMutation.mutate(newValue);
@@ -120,6 +145,15 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
 
   const handleDisconnectCancel = () => {
     setShowDisconnectDialog(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    setShowDeleteDialog(false);
+    deleteAccountMutation.mutate();
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
   };
 
   const handleLogout = () => {
@@ -281,10 +315,20 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="w-full"
+              className="w-full mb-3"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
+            </Button>
+            
+            <Button
+              onClick={() => setShowDeleteDialog(true)}
+              variant="destructive"
+              className="w-full"
+              disabled={deleteAccountMutation.isPending}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
             </Button>
           </CardContent>
         </Card>
@@ -324,6 +368,18 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
         title="Disconnect from Partner"
         description={`Are you sure you want to disconnect from ${coupleData?.partner?.displayName}? This will remove all connection history and you'll need to pair again to reconnect.`}
         confirmText="Disconnect"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
+      {/* Delete Account Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Account"
+        description="Are you sure you want to permanently delete your account? This will remove all your data and connection history. Your partner will need to set up a new connection. This action cannot be undone."
+        confirmText="Delete Account"
         cancelText="Cancel"
         variant="destructive"
       />
