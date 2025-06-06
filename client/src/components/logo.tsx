@@ -1,4 +1,4 @@
-import logoImage from "@assets/logo-transparent.png";
+import logoImage from "@assets/logo.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";

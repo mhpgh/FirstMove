@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { getStoredAuth, setStoredAuth, type User } from "@/lib/auth";
 import { NotificationProvider } from "@/contexts/notification-context";
 import { NotificationBell } from "@/components/notification-bell";
+import { Logo } from "@/components/logo";
 import AuthPage from "@/pages/auth";
 import PairingPage from "@/pages/pairing";
 import HomePage from "@/pages/home";
@@ -78,7 +79,7 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 gradient-bg rounded-full animate-spin mx-auto mb-4"></div>
+          <Logo size="md" className="animate-pulse mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -92,8 +93,10 @@ function App() {
           <div className="min-h-screen">
             {/* Header with notification bell for authenticated pages */}
             {user && appState !== "auth" && (
-              <div className="fixed top-0 right-0 z-50 p-4">
-                <NotificationBell />
+              <div className="fixed top-4 right-4 z-50">
+                <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
+                  <NotificationBell />
+                </div>
               </div>
             )}
 

@@ -364,7 +364,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 gradient-bg rounded-full animate-spin mx-auto mb-4"></div>
+          <Logo size="md" className="animate-pulse mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
