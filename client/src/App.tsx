@@ -113,6 +113,7 @@ function App() {
             <InsightsPage 
               user={user}
               onBack={handleBackToHome}
+              onShowSettings={handleShowSettings}
             />
           )}
 

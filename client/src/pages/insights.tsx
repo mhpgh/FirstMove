@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, ChevronLeft, ChevronRight, Calendar, Check, ArrowLeft } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight, Calendar, Check, Home, BarChart3, Settings } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -50,9 +50,10 @@ interface CalendarDay {
 interface InsightsPageProps {
   user: User;
   onBack: () => void;
+  onShowSettings: () => void;
 }
 
-export default function InsightsPage({ user, onBack }: InsightsPageProps) {
+export default function InsightsPage({ user, onBack, onShowSettings }: InsightsPageProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // Fetch couple data
@@ -150,18 +151,8 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-          <div className="flex items-center space-x-2">
-            <Logo size="sm" />
-          </div>
-          <div className="w-16"></div> {/* Spacer for alignment */}
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-center">
+          <Logo size="sm" />
         </div>
         <div className="max-w-md mx-auto px-4 pb-4">
           <h1 className="text-2xl font-bold text-gray-800">Insights</h1>
@@ -243,9 +234,9 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
                 >
                   <span className="text-sm">{day.dayNumber}</span>
                   {day.hasConnection && day.isCurrentMonth && (
-                    <div className="absolute top-1 right-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full flex items-center justify-center">
-                        <Check className="w-1 h-1 text-white" />
+                    <div className="absolute inset-0 bg-green-100 rounded-lg flex items-center justify-center">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
                       </div>
                     </div>
                   )}
@@ -306,6 +297,32 @@ export default function InsightsPage({ user, onBack }: InsightsPageProps) {
           </Card>
         )}
       </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100">
+        <div className="max-w-md mx-auto px-4 py-2">
+          <div className="flex items-center justify-around">
+            <button 
+              onClick={onBack}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
+              <Home className="text-lg mb-1" />
+              <span className="text-xs">Home</span>
+            </button>
+            <button className="flex flex-col items-center py-2 px-3 text-primary">
+              <BarChart3 className="text-lg mb-1" />
+              <span className="text-xs">Insights</span>
+            </button>
+            <button 
+              onClick={onShowSettings}
+              className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-primary"
+            >
+              <Settings className="text-lg mb-1" />
+              <span className="text-xs">Settings</span>
+            </button>
+          </div>
+        </div>
+      </nav>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Settings, ArrowLeft, Bell, Users, Trash2, LogOut } from "lucide-react";
+import { Settings, Bell, Users, Trash2, LogOut, Home, BarChart3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ interface SettingsPageProps {
   onBack: () => void;
   onNeedsPairing: () => void;
   onLogout?: () => void;
+  onShowInsights: () => void;
 }
 
 export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout }: SettingsPageProps) {
