@@ -233,12 +233,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Users not found" });
       }
       
-      // Only record connection if both users have tracking enabled
-      const shouldRecord = user1.keepTrack && user2.keepTrack;
+      // Always mark the match as connected to prevent duplicate matches
+      await storage.connectMatch(matchId);
       
-      if (shouldRecord) {
-        await storage.connectMatch(matchId);
-      }
+      // Only record in history if both users have tracking enabled
+      const shouldRecord = user1.keepTrack && user2.keepTrack;
       
       // Deactivate moods for both users after connection
       await storage.deactivateUserMoods(couple.user1Id);
