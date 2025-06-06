@@ -207,6 +207,9 @@ export class MemStorage implements IStorage {
   }
 
   async createMood(insertMood: InsertMood): Promise<Mood> {
+    // First, deactivate any existing active moods for this user
+    await this.deactivateUserMoods(insertMood.userId);
+    
     const id = this.moodIdCounter++;
     const mood: Mood = { 
       id,
@@ -427,6 +430,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMood(insertMood: InsertMood): Promise<Mood> {
+    // First, deactivate any existing active moods for this user
+    await this.deactivateUserMoods(insertMood.userId);
+    
+    // Then create the new mood
     const [mood] = await db
       .insert(moods)
       .values(insertMood)
