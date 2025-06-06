@@ -41,7 +41,7 @@ interface SettingsPageProps {
 }
 
 export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, onShowInsights }: SettingsPageProps) {
-  const [keepTrack, setKeepTrack] = useState<boolean>(true);
+  const [keepTrack, setKeepTrack] = useState<boolean>(user.keepTrack ?? false);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);

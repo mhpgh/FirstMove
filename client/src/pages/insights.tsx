@@ -269,9 +269,9 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
           <Card className="rounded-2xl shadow-sm mb-6">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Connection History</h3>
-              {matches && matches.length > 0 ? (
+              {matchesData?.matches && matchesData.matches.filter(match => match.recorded && match.connectedAt).length > 0 ? (
                 <div className="space-y-3">
-                  {matches
+                  {matchesData.matches
                     .filter(match => match.recorded && match.connectedAt)
                     .sort((a, b) => new Date(b.connectedAt!).getTime() - new Date(a.connectedAt!).getTime())
                     .map((match, index) => {
@@ -298,6 +298,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
                         hour12: true
                       });
 
+                      const filteredMatches = matchesData.matches.filter(m => m.recorded && m.connectedAt);
                       return (
                         <div key={match.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
                           <div className="flex items-center space-x-3">
@@ -308,7 +309,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
                             </div>
                           </div>
                           <div className="text-xs text-gray-400">
-                            #{matches.filter(m => m.recorded && m.connectedAt).length - index}
+                            #{filteredMatches.length - index}
                           </div>
                         </div>
                       );
