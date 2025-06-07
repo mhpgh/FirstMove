@@ -1,6 +1,6 @@
 import { User, Partner, Couple, Match, Mood } from '../types/User';
 
-const API_BASE_URL = 'https://your-replit-app-url.replit.app'; // Update with your actual Replit app URL
+const API_BASE_URL = 'https://6654dd72-2db1-449d-8c50-76996ae1b1d0-00-31bgwtp0zk1q0.riker.replit.dev'; // Your current Replit app URL
 
 class ApiService {
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
