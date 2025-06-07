@@ -246,6 +246,9 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
           </CardContent>
         </Card>
 
+        {/* Push Notifications */}
+        <PushNotificationSettings />
+
         {/* Nudge Settings */}
         <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">

@@ -10,6 +10,7 @@ import { MatchModal } from "@/components/match-modal";
 import { ConnectionStatus } from "@/components/connection-status";
 import { Logo } from "@/components/logo";
 import { useWebSocket } from "@/hooks/use-websocket";
+import { useNotificationHandler } from "@/hooks/use-notification-handler";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, logoutUser } from "@/lib/auth";
@@ -68,6 +69,12 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // WebSocket connection
   const { isConnected, lastMessage } = useWebSocket(user);
+  
+  // Handle push notifications for WebSocket events
+  useNotificationHandler({ 
+    lastMessage, 
+    partnerName: coupleData?.partner?.displayName 
+  });
 
   // Fetch couple data
   const { data: coupleData, isLoading: isLoadingCouple } = useQuery<CoupleData>({
