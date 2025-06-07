@@ -156,11 +156,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
             <Logo size="sm" />
             <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <button className="relative p-1 hover:bg-gray-100 rounded-full transition-colors">
-              <Bell className="text-gray-400 text-lg" />
-            </button>
-          </div>
+          
         </div>
       </header>
 
