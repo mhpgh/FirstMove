@@ -320,6 +320,15 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
   }, [isInMood, showConnectionPanel, currentMatch]);
 
   const handleInMoodPress = () => {
+    // Validate that duration is not 0
+    if (selectedHours === 0 && selectedMinutes === 0) {
+      toast({
+        title: "Invalid duration",
+        description: "Please select at least 1 minute",
+        variant: "destructive",
+      });
+      return;
+    }
     setInMoodMutation.mutate();
   };
 
@@ -439,12 +448,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                     </label>
                     <div className="flex space-x-2">
                       <div className="flex-1">
+                        <label className="block text-xs text-gray-500 mb-1">Hours</label>
                         <Select value={selectedHours.toString()} onValueChange={(value) => setSelectedHours(parseInt(value))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({length: 24}, (_, i) => i + 1).map(hour => (
+                            {Array.from({length: 25}, (_, i) => i).map(hour => (
                               <SelectItem key={hour} value={hour.toString()}>
                                 {hour} {hour === 1 ? 'hour' : 'hours'}
                               </SelectItem>
@@ -453,12 +463,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                         </Select>
                       </div>
                       <div className="flex-1">
+                        <label className="block text-xs text-gray-500 mb-1">Minutes</label>
                         <Select value={selectedMinutes.toString()} onValueChange={(value) => setSelectedMinutes(parseInt(value))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({length: 12}, (_, i) => i * 5).map(minute => (
+                            {Array.from({length: 60}, (_, i) => i).map(minute => (
                               <SelectItem key={minute} value={minute.toString()}>
                                 {minute} {minute === 1 ? 'minute' : 'minutes'}
                               </SelectItem>
@@ -495,12 +506,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                     </label>
                     <div className="flex space-x-2">
                       <div className="flex-1">
+                        <label className="block text-xs text-gray-500 mb-1">Hours</label>
                         <Select value={selectedHours.toString()} onValueChange={(value) => setSelectedHours(parseInt(value))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({length: 24}, (_, i) => i + 1).map(hour => (
+                            {Array.from({length: 25}, (_, i) => i).map(hour => (
                               <SelectItem key={hour} value={hour.toString()}>
                                 {hour} {hour === 1 ? 'hour' : 'hours'}
                               </SelectItem>
@@ -509,12 +521,13 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
                         </Select>
                       </div>
                       <div className="flex-1">
+                        <label className="block text-xs text-gray-500 mb-1">Minutes</label>
                         <Select value={selectedMinutes.toString()} onValueChange={(value) => setSelectedMinutes(parseInt(value))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({length: 12}, (_, i) => i * 5).map(minute => (
+                            {Array.from({length: 60}, (_, i) => i).map(minute => (
                               <SelectItem key={minute} value={minute.toString()}>
                                 {minute} {minute === 1 ? 'minute' : 'minutes'}
                               </SelectItem>
