@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'FirstMove',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    url: 'https://6654dd72-2db1-449d-8c50-76996ae1b1d0-00-31bgwtp0zk1q0.riker.replit.dev',
+    cleartext: true
   },
   plugins: {
     PushNotifications: {
