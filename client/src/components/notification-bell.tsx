@@ -24,7 +24,7 @@ export function NotificationBell() {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative pl-[4px] pr-[4px] pt-[1px] pb-[1px]" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors bg-white rounded-full pt-[0px] pb-[0px] pl-[0px] pr-[0px]"
