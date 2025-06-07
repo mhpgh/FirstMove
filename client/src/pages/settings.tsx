@@ -168,7 +168,7 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
       <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Logo size="sm" />
+            <Logo size="header" />
             <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
         </div>

@@ -8,7 +8,7 @@ interface LogoProps {
 export function Logo({ size = "md", className = "" }: LogoProps) {
   const sizeClasses = {
     sm: "w-6 h-6",
-    header: "w-8 h-8", // 25% larger than sm for header use
+    header: "w-7 h-7", // 25% larger than sm for header use
     md: "w-8 h-8", 
     lg: "w-16 h-16"
   };

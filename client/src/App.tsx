@@ -93,7 +93,7 @@ function App() {
           <div className="min-h-screen">
             {/* Header with notification bell for authenticated pages */}
             {user && appState !== "auth" && (
-              <div className="fixed top-4 right-4 z-[100]">
+              <div className="fixed top-3 right-4 z-[100]">
                 <NotificationBell />
               </div>
             )}
