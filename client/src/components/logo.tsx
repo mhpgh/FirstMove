@@ -1,13 +1,14 @@
-import logoImage from "@assets/logo.png";
+import logoImage from "@assets/FirstMoveLogo_1749295720207.png";
 
 interface LogoProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "header" | "md" | "lg";
   className?: string;
 }
 
 export function Logo({ size = "md", className = "" }: LogoProps) {
   const sizeClasses = {
     sm: "w-6 h-6",
+    header: "w-8 h-8", // 25% larger than sm for header use
     md: "w-8 h-8", 
     lg: "w-16 h-16"
   };
