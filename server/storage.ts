@@ -1,9 +1,10 @@
 import { 
-  users, couples, moods, matches,
+  users, couples, moods, matches, pushSubscriptions,
   type User, type InsertUser, 
   type Couple, type InsertCouple,
   type Mood, type InsertMood,
-  type Match, type InsertMatch
+  type Match, type InsertMatch,
+  type PushSubscription, type InsertPushSubscription
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, lt, gt } from "drizzle-orm";
@@ -47,6 +48,11 @@ export interface IStorage {
   
   // Partnership methods
   getPartner(userId: number): Promise<User | undefined>;
+  
+  // Push notification methods
+  createPushSubscription(subscription: InsertPushSubscription): Promise<PushSubscription>;
+  getPushSubscriptionsByUserId(userId: number): Promise<PushSubscription[]>;
+  deletePushSubscription(userId: number, endpoint: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -291,6 +297,27 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(userId: number): Promise<void> {
     await db.delete(users).where(eq(users.id, userId));
+  }
+
+  async createPushSubscription(insertSubscription: InsertPushSubscription): Promise<PushSubscription> {
+    // First, delete any existing subscription for this user and endpoint
+    await this.deletePushSubscription(insertSubscription.userId, insertSubscription.endpoint);
+    
+    const [subscription] = await db
+      .insert(pushSubscriptions)
+      .values(insertSubscription)
+      .returning();
+    return subscription;
+  }
+
+  async getPushSubscriptionsByUserId(userId: number): Promise<PushSubscription[]> {
+    return await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+  }
+
+  async deletePushSubscription(userId: number, endpoint: string): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.endpoint, endpoint)));
   }
 }
 

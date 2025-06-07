@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { insertUserSchema, loginSchema, pairingSchema, insertMoodSchema } from "@shared/schema";
+import { insertUserSchema, loginSchema, pairingSchema, insertMoodSchema, insertPushSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 
 // Store active WebSocket connections by user ID
@@ -379,6 +379,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true });
     } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Push notification routes
+  app.post("/api/push-subscription", async (req, res) => {
+    try {
+      const { userId, subscription } = req.body;
+      
+      if (!userId || !subscription) {
+        return res.status(400).json({ message: "Missing userId or subscription" });
+      }
+
+      const pushData = insertPushSubscriptionSchema.parse({
+        userId: parseInt(userId),
+        endpoint: subscription.endpoint,
+        keys: JSON.stringify(subscription.keys)
+      });
+
+      await storage.createPushSubscription(pushData);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Push subscription error:', error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
