@@ -260,7 +260,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
         </Card>
 
         {/* Connection History List */}
-        {user.keepTrack && (
+        {user.keepTrack && coupleData?.partner?.keepTrack && (
           <Card className="rounded-2xl shadow-sm mb-6">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Connection History</h3>
@@ -351,7 +351,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
                     Partner tracking disabled
                   </p>
                   <p className="text-xs text-amber-600">
-                    Your partner has not enabled "Keep Track" in their Settings. You can still see your connection history below.
+                    {coupleData.partner.displayName} has not enabled "Keep Track" in their Settings. Both partners must enable tracking for connections to be recorded.
                   </p>
                 </div>
               </div>

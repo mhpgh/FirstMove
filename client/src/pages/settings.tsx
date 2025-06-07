@@ -45,6 +45,7 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showKeepTrackDialog, setShowKeepTrackDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -134,7 +135,21 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
   });
 
   const handleKeepTrackToggle = (newValue: boolean) => {
-    updateKeepTrackMutation.mutate(newValue);
+    // If turning off tracking, show confirmation dialog
+    if (!newValue && keepTrack) {
+      setShowKeepTrackDialog(true);
+    } else {
+      updateKeepTrackMutation.mutate(newValue);
+    }
+  };
+
+  const handleKeepTrackConfirm = () => {
+    setShowKeepTrackDialog(false);
+    updateKeepTrackMutation.mutate(false);
+  };
+
+  const handleKeepTrackCancel = () => {
+    setShowKeepTrackDialog(false);
   };
 
   const handleDisconnectConfirm = () => {
@@ -196,7 +211,7 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="font-medium text-gray-700">Track Connections</p>
-                <p className="text-sm text-gray-500">Save connection history in Insights</p>
+                <p className="text-sm text-gray-500">Both partners must enable this to record connection history</p>
               </div>
               <Switch
                 checked={keepTrack}
@@ -382,6 +397,18 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
         title="Delete Account"
         description="Are you sure you want to permanently delete your account? This will remove all your data and connection history. Your partner will need to set up a new connection. This action cannot be undone."
         confirmText="Delete Account"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
+      {/* Keep Track Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showKeepTrackDialog}
+        onClose={handleKeepTrackCancel}
+        onConfirm={handleKeepTrackConfirm}
+        title="Disable Connection Tracking"
+        description={`Are you sure you want to turn off connection tracking? This will permanently delete all connection history for both you and ${coupleData?.partner?.displayName}. This action cannot be undone.`}
+        confirmText="Turn Off Tracking"
         cancelText="Cancel"
         variant="destructive"
       />

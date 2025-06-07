@@ -309,9 +309,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "keepTrack must be a boolean" });
       }
       
-      // If turning off tracking, clear history
+      // If turning off tracking, clear history for both users in the couple
       if (!keepTrack) {
-        await storage.clearUserHistory(userId);
+        const couple = await storage.getCoupleByUserId(userId);
+        if (couple) {
+          const partnerId = couple.user1Id === userId ? couple.user2Id : couple.user1Id;
+          
+          // Clear history for both users
+          await storage.clearUserHistory(userId);
+          if (partnerId) {
+            await storage.clearUserHistory(partnerId);
+          }
+          
+          // Delete all recorded matches for this couple
+          const matches = await storage.getMatchesByCoupleId(couple.id);
+          for (const match of matches) {
+            if (match.recorded) {
+              await storage.deleteMatch(match.id);
+            }
+          }
+        }
       }
       
       await storage.updateUserKeepTrack(userId, keepTrack);
