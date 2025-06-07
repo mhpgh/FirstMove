@@ -121,7 +121,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       
       if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
-          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
         });
       }
     },
@@ -152,7 +152,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       
       if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
-          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
         });
       }
       
@@ -202,7 +202,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       // Refresh matches data and mood data
       if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
-          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
         });
       }
       
@@ -242,9 +242,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       setShowMatchModal(true);
       setShowConnectionPanel(true);
       // Refresh matches data
-      if (coupleData?.couple.id) {
+      if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
-          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
         });
       }
     } else if (lastMessage?.type === "connection") {
@@ -270,9 +270,9 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       }, 2000);
       
       // Refresh data immediately to sync with server state
-      if (coupleData?.couple.id) {
+      if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
-          queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
+          queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
         });
         queryClient.invalidateQueries({
           queryKey: [`/api/user/${user.id}/moods`],
@@ -281,7 +281,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       
       // Force refresh mood data after a short delay to ensure server has processed deactivation
       setTimeout(() => {
-        if (coupleData?.couple.id) {
+        if (coupleData?.couple?.id) {
           queryClient.invalidateQueries({
             queryKey: [`/api/user/${user.id}/moods`],
           });
