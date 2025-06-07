@@ -69,12 +69,6 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // WebSocket connection
   const { isConnected, lastMessage } = useWebSocket(user);
-  
-  // Handle push notifications for WebSocket events
-  useNotificationHandler({ 
-    lastMessage, 
-    partnerName: coupleData?.partner?.displayName 
-  });
 
   // Fetch couple data
   const { data: coupleData, isLoading: isLoadingCouple } = useQuery<CoupleData>({
@@ -96,6 +90,12 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // Derive mood state from server data
   const isInMood = activeMoodData?.moods && activeMoodData.moods.length > 0;
+
+  // Handle push notifications for WebSocket events
+  useNotificationHandler({ 
+    lastMessage, 
+    partnerName: coupleData?.partner?.displayName 
+  });
 
 
 
