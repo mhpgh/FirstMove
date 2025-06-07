@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { WebSocketMessage } from "./use-websocket";
-import { pushNotificationService } from "@/lib/push-notifications";
+import { mobilePushService } from "@/lib/mobile-push-notifications";
 import { useNotifications } from "@/contexts/notification-context";
 
 interface NotificationHandlerProps {

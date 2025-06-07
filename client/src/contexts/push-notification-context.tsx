@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { pushNotificationService } from '@/lib/push-notifications';
+import { mobilePushService } from '@/lib/mobile-push-notifications';
 import { User } from '@/lib/auth';
 
 interface PushNotificationContextType {
@@ -24,16 +24,18 @@ export function PushNotificationProvider({ children, user }: PushNotificationPro
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    const supported = pushNotificationService.isSupported();
+    const supported = mobilePushService.isSupported();
     setIsSupported(supported);
     
     if (supported) {
-      setHasPermission(Notification.permission === 'granted');
+      // For mobile, check permissions differently
+      setHasPermission(false); // Will be set when permission is granted
+      mobilePushService.setupListeners?.();
     }
   }, []);
 
   const requestPermission = async (): Promise<boolean> => {
-    const granted = await pushNotificationService.requestPermission();
+    const granted = await mobilePushService.requestPermission();
     setHasPermission(granted);
     return granted;
   };
@@ -43,7 +45,7 @@ export function PushNotificationProvider({ children, user }: PushNotificationPro
       return false;
     }
 
-    const subscription = await pushNotificationService.subscribeToPush();
+    const subscription = await mobilePushService.subscribeToPush();
     const success = subscription !== null;
     setIsSubscribed(success);
 
@@ -67,7 +69,7 @@ export function PushNotificationProvider({ children, user }: PushNotificationPro
   };
 
   const sendTestNotification = () => {
-    pushNotificationService.sendNotification(
+    mobilePushService.sendLocalNotification(
       'FirstMove Test',
       'Push notifications are working! You\'ll get notified when your partner is in the mood.',
       { type: 'test' }
