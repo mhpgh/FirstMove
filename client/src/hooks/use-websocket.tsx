@@ -46,6 +46,14 @@ export function useWebSocket(user: User | null) {
       setIsConnected(false);
     };
 
+    // Add error handling for promise rejections
+    const handleError = (error: Event) => {
+      console.error("WebSocket connection error:", error);
+      setIsConnected(false);
+    };
+
+    ws.current.addEventListener('error', handleError);
+
     return () => {
       ws.current?.close();
     };
