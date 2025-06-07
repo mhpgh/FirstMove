@@ -56,6 +56,11 @@ interface InsightsPageProps {
 export default function InsightsPage({ user, onBack, onShowSettings }: InsightsPageProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  // Fetch current user data to get latest keepTrack state
+  const { data: currentUserData } = useQuery<{ user: User }>({
+    queryKey: [`/api/user/${user.id}`],
+  });
+
   // Fetch couple data
   const { data: coupleData } = useQuery<CoupleData>({
     queryKey: [`/api/user/${user.id}/couple`],
@@ -67,6 +72,9 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
     queryKey: [`/api/couple/${coupleData?.couple.id}/matches`],
     enabled: !!coupleData?.couple.id,
   });
+
+  // Derive current user tracking state from server data
+  const currentUser = currentUserData?.user || user;
 
   // Calendar navigation functions
   const goToPreviousMonth = () => {
@@ -260,7 +268,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
         </Card>
 
         {/* Connection History List */}
-        {user.keepTrack && coupleData?.partner?.keepTrack && (
+        {currentUser.keepTrack && coupleData?.partner?.keepTrack && (
           <Card className="rounded-2xl shadow-sm mb-6">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Connection History</h3>
@@ -319,7 +327,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
         )}
 
         {/* Information */}
-        {!user.keepTrack && (
+        {!currentUser.keepTrack && (
           <Card className="rounded-2xl shadow-sm border-blue-200 bg-blue-50">
             <CardContent className="p-4">
               <div className="flex items-start space-x-3">
@@ -339,7 +347,7 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
           </Card>
         )}
 
-        {user.keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
+        {currentUser.keepTrack && coupleData?.partner && !coupleData.partner.keepTrack && (
           <Card className="rounded-2xl shadow-sm border-amber-200 bg-amber-50">
             <CardContent className="p-4">
               <div className="flex items-start space-x-3">

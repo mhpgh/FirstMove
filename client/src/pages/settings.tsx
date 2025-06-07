@@ -72,8 +72,21 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
       return response.json();
     },
     onSuccess: (data, newKeepTrack) => {
+      // Invalidate current user's data
       queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}/couple`] });
       queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}`] });
+      
+      // Invalidate partner's data if we have couple data
+      if (coupleData?.partner) {
+        queryClient.invalidateQueries({ queryKey: [`/api/user/${coupleData.partner.id}/couple`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/user/${coupleData.partner.id}`] });
+      }
+      
+      // Invalidate matches data since history may have been cleared
+      if (coupleData?.couple) {
+        queryClient.invalidateQueries({ queryKey: [`/api/couple/${coupleData.couple.id}/matches`] });
+      }
+      
       toast({
         title: "Settings updated",
         description: newKeepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
