@@ -38,6 +38,14 @@ export const matches = pgTable("matches", {
   recorded: boolean("recorded").default(false).notNull(),
 });
 
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  endpoint: text("endpoint").notNull(),
+  keys: text("keys").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -60,6 +68,12 @@ export const insertMatchSchema = createInsertSchema(matches).pick({
   coupleId: true,
 });
 
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).pick({
+  userId: true,
+  endpoint: true,
+  keys: true,
+});
+
 export const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
@@ -73,9 +87,11 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertCouple = z.infer<typeof insertCoupleSchema>;
 export type InsertMood = z.infer<typeof insertMoodSchema>;
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
 export type User = typeof users.$inferSelect;
 export type Couple = typeof couples.$inferSelect;
 export type Mood = typeof moods.$inferSelect;
 export type Match = typeof matches.$inferSelect;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 export type PairingData = z.infer<typeof pairingSchema>;
