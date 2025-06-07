@@ -41,7 +41,6 @@ interface SettingsPageProps {
 }
 
 export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, onShowInsights }: SettingsPageProps) {
-  const [keepTrack, setKeepTrack] = useState<boolean>(user.keepTrack ?? false);
   const [nudgeEnabled, setNudgeEnabled] = useState<boolean>(false);
   const [nudgeDays, setNudgeDays] = useState<number>(7);
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
@@ -49,18 +48,19 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch current user data to get latest keepTrack state
+  const { data: currentUserData } = useQuery<{ user: User }>({
+    queryKey: [`/api/user/${user.id}`],
+  });
+
   // Fetch couple data
   const { data: coupleData } = useQuery<CoupleData>({
     queryKey: [`/api/user/${user.id}/couple`],
     retry: false,
   });
 
-  // Initialize settings from user data
-  useEffect(() => {
-    if (user.keepTrack !== undefined) {
-      setKeepTrack(user.keepTrack);
-    }
-  }, [user.keepTrack]);
+  // Derive keepTrack state from server data
+  const keepTrack = currentUserData?.user?.keepTrack ?? user.keepTrack ?? false;
 
   // Update keep track preference mutation
   const updateKeepTrackMutation = useMutation({
@@ -70,11 +70,12 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, newKeepTrack) => {
       queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}/couple`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/user/${user.id}`] });
       toast({
         title: "Settings updated",
-        description: keepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
+        description: newKeepTrack ? "Connection tracking is now enabled" : "Connection tracking is now disabled and history cleared",
       });
     },
     onError: (error: any) => {
@@ -83,7 +84,6 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
         description: error.message || "Failed to update tracking preference",
         variant: "destructive",
       });
-      setKeepTrack(!keepTrack);
     },
   });
 
@@ -134,7 +134,6 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
   });
 
   const handleKeepTrackToggle = (newValue: boolean) => {
-    setKeepTrack(newValue);
     updateKeepTrackMutation.mutate(newValue);
   };
 
