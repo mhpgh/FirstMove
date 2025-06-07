@@ -79,7 +79,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
             <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-800">
-            Welcome to Hintly
+            Welcome to FirstMove
           </CardTitle>
           <p className="text-gray-600">
             {isLogin ? "Sign in to your account" : "Create your account"}
