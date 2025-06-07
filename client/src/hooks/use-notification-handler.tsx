@@ -18,8 +18,8 @@ export function useNotificationHandler({ lastMessage, partnerName }: Notificatio
       // Add in-app notification
       addNotification('match', `You have a match! ${partnerName || 'Your partner'} is in the mood too.`);
       
-      // Send browser push notification
-      pushNotificationService.sendNotification(
+      // Send mobile push notification
+      mobilePushService.sendLocalNotification(
         "You have a match! 💕",
         `${partnerName || 'Your partner'} is in the mood too! Time to connect.`,
         { type: 'match', matchId: lastMessage.matchId }
@@ -30,8 +30,8 @@ export function useNotificationHandler({ lastMessage, partnerName }: Notificatio
       // Add in-app notification
       addNotification('connection', 'Connection made! Enjoy your time together.');
       
-      // Send browser push notification
-      pushNotificationService.sendNotification(
+      // Send mobile push notification
+      mobilePushService.sendLocalNotification(
         "Connection made! 🔥",
         "Your partner connected. Enjoy your time together!",
         { type: 'connection', matchId: lastMessage.matchId }
