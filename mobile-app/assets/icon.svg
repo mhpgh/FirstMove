@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C147E9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="246" fill="url(#gradient)" stroke="white" stroke-width="20"/>
+  
+  <!-- Heart shape -->
+  <path d="M256 380c-60-45-105-75-105-120 0-33 27-60 60-60 18 0 34 9 45 22 11-13 27-22 45-22 33 0 60 27 60 60 0 45-45 75-105 120z" fill="white"/>
+  
+  <!-- Arrow -->
+  <path d="M200 220 L340 300 M320 280 L340 300 L320 320" stroke="#1e40af" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
