@@ -156,7 +156,6 @@ export default function InsightsPage({ user, onBack, onShowSettings }: InsightsP
             <Logo size="sm" />
             <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
-          
         </div>
       </header>
 

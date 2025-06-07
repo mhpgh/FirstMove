@@ -172,7 +172,6 @@ export default function SettingsPage({ user, onBack, onNeedsPairing, onLogout, o
             <Logo size="sm" />
             <span className="text-xl font-semibold text-gray-800">FirstMove</span>
           </div>
-          
         </div>
       </header>
 
