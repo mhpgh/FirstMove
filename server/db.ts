@@ -5,6 +5,8 @@ import * as schema from "@shared/schema";
 
 // Configure Neon to use WebSocket for database connections
 neonConfig.webSocketConstructor = WebSocket;
+neonConfig.useSecureWebSocket = true;
+neonConfig.pipelineConnect = false;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -14,37 +16,23 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 30000, // Increased timeout
-  max: 10,
-  allowExitOnIdle: false,
-  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+  max: 5,
+  allowExitOnIdle: true,
+  idleTimeoutMillis: 10000,
 });
 
 export const db = drizzle({ client: pool, schema });
 
 // Test database connection on startup with retry logic
 export async function testConnection() {
-  const maxRetries = 3;
-  let retries = 0;
-  
-  while (retries < maxRetries) {
-    try {
-      const client = await pool.connect();
-      await client.query('SELECT 1');
-      client.release();
-      console.log('Database connection successful');
-      return;
-    } catch (error) {
-      retries++;
-      console.error(`Database connection attempt ${retries} failed:`, error);
-      
-      if (retries >= maxRetries) {
-        console.error('Max database connection retries reached. Starting server without initial DB test.');
-        return; // Don't throw, just warn and continue
-      }
-      
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    console.log('Database connection successful');
+  } catch (error) {
+    console.warn('Database connection test failed, but continuing server startup:', error instanceof Error ? error.message : String(error));
+    // Don't fail server startup, just log the warning
   }
 }

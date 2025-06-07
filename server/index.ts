@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Test database connection first
+    // Test database connection first (non-blocking)
     await testConnection();
     
     const server = await registerRoutes(app);
@@ -65,15 +65,15 @@ app.use((req, res, next) => {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
+    server.listen(port, "0.0.0.0", () => {
       log(`serving on port ${port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
-    process.exit(1);
+    // Try to start server anyway, just log the error
+    const port = 5000;
+    app.listen(port, "0.0.0.0", () => {
+      log(`serving on port ${port} (with startup errors)`);
+    });
   }
 })();
