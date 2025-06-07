@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { pushService } from "./push-service";
 import { insertUserSchema, loginSchema, pairingSchema, insertMoodSchema, insertPushSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -472,6 +473,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       console.log(`Created new match: ${match.id}`);
       
+      // Get user and partner info for notifications
+      const user = await storage.getUser(userId);
+      const partner = await storage.getUser(partnerId);
+      
       // Notify both users via WebSocket
       const userWs = userConnections.get(userId);
       const partnerWs = userConnections.get(partnerId);
@@ -488,6 +493,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (partnerWs && partnerWs.readyState === WebSocket.OPEN) {
         partnerWs.send(JSON.stringify(matchNotification));
+      }
+      
+      // Send push notifications
+      if (user && partner) {
+        await pushService.sendMatchNotification(userId, partner.displayName);
+        await pushService.sendMatchNotification(partnerId, user.displayName);
       }
     } else {
       console.log(`No partner mood found`);

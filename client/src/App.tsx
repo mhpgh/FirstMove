@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getStoredAuth, setStoredAuth, type User } from "@/lib/auth";
 import { NotificationProvider } from "@/contexts/notification-context";
+import { PushNotificationProvider } from "@/contexts/push-notification-context";
 import { NotificationBell } from "@/components/notification-bell";
 import { Logo } from "@/components/logo";
 import AuthPage from "@/pages/auth";
@@ -90,7 +91,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <NotificationProvider>
-          <div className="min-h-screen">
+          <PushNotificationProvider user={user}>
+            <div className="min-h-screen">
             {/* Header with notification bell for authenticated pages */}
             {user && appState !== "auth" && (
               <div className="fixed top-3 right-4 z-[100]">
@@ -137,8 +139,9 @@ function App() {
                 onShowInsights={handleShowInsights}
               />
             )}
-          </div>
-          <Toaster />
+            </div>
+            <Toaster />
+          </PushNotificationProvider>
         </NotificationProvider>
       </TooltipProvider>
     </QueryClientProvider>
