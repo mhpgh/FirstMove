@@ -17,51 +17,61 @@ export function useWebSocket(user: User | null) {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
-    ws.current = new WebSocket(wsUrl);
+    try {
+      ws.current = new WebSocket(wsUrl);
 
-    ws.current.onopen = () => {
-      setIsConnected(true);
-      // Authenticate with the server
-      ws.current?.send(JSON.stringify({
-        type: 'auth',
-        userId: user.id
-      }));
-    };
+      ws.current.onopen = () => {
+        setIsConnected(true);
+        // Authenticate with the server
+        try {
+          ws.current?.send(JSON.stringify({
+            type: 'auth',
+            userId: user.id
+          }));
+        } catch (error) {
+          console.error("Error sending auth message:", error);
+        }
+      };
 
-    ws.current.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        setLastMessage(message);
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
+      ws.current.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          setLastMessage(message);
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
 
-    ws.current.onclose = () => {
+      ws.current.onclose = () => {
+        setIsConnected(false);
+      };
+
+      ws.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        setIsConnected(false);
+      };
+
+    } catch (error) {
+      console.error("Error creating WebSocket connection:", error);
       setIsConnected(false);
-    };
-
-    ws.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setIsConnected(false);
-    };
-
-    // Add error handling for promise rejections
-    const handleError = (error: Event) => {
-      console.error("WebSocket connection error:", error);
-      setIsConnected(false);
-    };
-
-    ws.current.addEventListener('error', handleError);
+    }
 
     return () => {
-      ws.current?.close();
+      try {
+        ws.current?.close();
+      } catch (error) {
+        console.error("Error closing WebSocket:", error);
+      }
     };
   }, [user]);
 
   const sendMessage = (message: WebSocketMessage) => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify(message));
+    try {
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify(message));
+      }
+    } catch (error) {
+      console.error("Error sending WebSocket message:", error);
     }
   };
 
