@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 interface MatchModalProps {
   isOpen: boolean;
@@ -25,8 +25,8 @@ export function MatchModal({
           You and {partnerName} are both ready to connect
         </DialogDescription>
         <div className="text-center animate-slide-up">
-          <div className="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-white text-xl" />
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Logo size="lg" />
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">It's time!</h3>
           <p className="text-gray-600 mb-6">
