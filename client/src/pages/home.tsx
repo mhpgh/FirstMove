@@ -78,8 +78,8 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
 
   // Fetch recent matches
   const { data: matchesData } = useQuery<{ matches: Match[] }>({
-    queryKey: [`/api/couple/${coupleData?.couple.id}/matches`],
-    enabled: !!coupleData?.couple.id,
+    queryKey: [`/api/couple/${coupleData?.couple?.id}/matches`],
+    enabled: !!coupleData?.couple?.id,
   });
 
   // Fetch active mood for current user
@@ -119,7 +119,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         queryKey: [`/api/user/${user.id}/moods`],
       });
       
-      if (coupleData?.couple.id) {
+      if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
         });
@@ -150,7 +150,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         queryKey: [`/api/user/${user.id}/moods`],
       });
       
-      if (coupleData?.couple.id) {
+      if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
         });
@@ -200,7 +200,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
       }, 2000);
 
       // Refresh matches data and mood data
-      if (coupleData?.couple.id) {
+      if (coupleData?.couple?.id) {
         queryClient.invalidateQueries({
           queryKey: [`/api/couple/${coupleData.couple.id}/matches`],
         });
@@ -413,7 +413,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         </div>
         {/* Connection Status */}
         <ConnectionStatus 
-          partner={coupleData.partner} 
+          partner={coupleData?.partner} 
           isConnected={isConnected} 
         />
 
@@ -598,7 +598,7 @@ export default function HomePage({ user, onNeedsPairing, onLogout, onShowInsight
         <MatchModal
           isOpen={showMatchModal}
           onClose={handleMatchModalClose}
-          partnerName={coupleData.partner.displayName}
+          partnerName={coupleData?.partner?.displayName}
           moodType="intimate"
           onStartConversation={handleMatchModalClose}
         />
