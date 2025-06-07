@@ -1,4 +1,4 @@
-import logoImage from "@assets/FirstMoveLogo_1749308421855.png";
+import logoImage from "@assets/FirstMoveLogo_1749295720207.png";
 
 interface LogoProps {
   size?: "sm" | "header" | "md" | "lg";
